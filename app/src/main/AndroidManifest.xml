@@ -38,6 +38,7 @@
         android:name="android.hardware.microphone"
         android:required="false" /> -->
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- Allow writing to external storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!-- Allow access to Bluetooth devices -->

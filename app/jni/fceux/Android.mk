@@ -273,10 +273,11 @@ LOCAL_CFLAGS += \
     -Wno-unused-local-typedefs  \
     -fPIC \
     -Wno-c++11-narrowing \
+    -Wno-unused-variable \
 
 LOCAL_CPPFLAGS += -fexceptions
 
-LOCAL_LDLIBS := -ldl -lGLESv1_CM -lGLESv2
+LOCAL_LDLIBS := -ldl -lGLESv1_CM -lGLESv2 -landroid -lpthread
 
 # -lz -lm
 #-lrt

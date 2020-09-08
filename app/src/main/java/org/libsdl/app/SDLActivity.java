@@ -1,5 +1,10 @@
 package org.libsdl.app;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.lang.reflect.Method;
@@ -187,6 +192,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         Log.v(TAG, "Device: " + Build.DEVICE);
         Log.v(TAG, "Model: " + Build.MODEL);
         Log.v(TAG, "onCreate()");
+        copyGameToDataFiles();
         super.onCreate(savedInstanceState);
 
         try {
@@ -279,6 +285,47 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             if (filename != null) {
                 Log.v(TAG, "Got filename: " + filename);
                 SDLActivity.onNativeDropFile(filename);
+            }
+        }
+    }
+
+    void copyGameToDataFiles() {
+        InputStream in = null;
+        FileOutputStream out = null;
+        String path = this.getApplicationContext().getFilesDir()
+                .getAbsolutePath() + "/F1.nes"; // data/data目录
+        File file = new File(path);
+        if(!file.exists()) {
+            try
+            {
+                in = this.getAssets().open("F1.nes"); // 从assets目录下复制
+                out = new FileOutputStream(file);
+                int length = -1;
+                byte[] buf = new byte[1024];
+                while ((length = in.read(buf)) != -1)
+                {
+                    out.write(buf, 0, length);
+                }
+                out.flush();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if(in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if(out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }

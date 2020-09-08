@@ -25,15 +25,6 @@
 #include "../videolog/nesvideos-piece.h"
 #endif
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
-#ifdef _GTK
-#include <gtk/gtk.h>
-#include "gui.h"
-#endif
-
 #include <unistd.h>
 #include <csignal>
 #include <cstring>
@@ -160,6 +151,7 @@ Config *g_config;
 
 static void ShowUsage(char *prog)
 {
+    FCEUD_Message("show Usage");
 	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
 	puts(DriverUsage);
 #ifdef _S9XLUA_H
@@ -471,6 +463,7 @@ FCEUD_Update(uint8 *XBuf,
  */
 EMUFILE_FILE* FCEUD_UTF8_fstream(const char *fn, const char *m)
 {
+	SDL_Log("->FCEUD_UTF8_fstream");
 	std::ios_base::openmode mode = std::ios_base::binary;
 	if(!strcmp(m,"r") || !strcmp(m,"rb"))
 		mode |= std::ios_base::in;
@@ -488,12 +481,26 @@ EMUFILE_FILE* FCEUD_UTF8_fstream(const char *fn, const char *m)
 	//return new std::fstream(fn,mode);
 }
 
+#include "SDL_rwops.h"
+//#include <android/asset_manager.h>
 /**
  * Opens a file, C++ style, to be read a byte at a time.
  */
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode)
 {
+//	SDL_Log("->FCEUD_UTF8fopen");
+//	SDL_RWops *rwops = SDL_RWFromFile(fn, mode);
+//	AAsset *assetFile = AAssetManager_open(nativeasset, "F1.nes", AASSET_MODE_BUFFER);
+//	size_t fileLength = AAsset_getLength(assetFile);
+//	LOGD("before fd fileLength:%d",fileLength);
+//
+//	off_t start = 0, length = 0;
+//	int fd = AAsset_openFileDescriptor(assetFile, &start, &length);
+//
+//	return(fdopen(fd, mode));
+//    FILE *fp = rwops->hidden.stdio.fp;
 	return(fopen(fn,mode));
+//    return fp;
 }
 
 static char *s_linuxCompilerString = "g++ " __VERSION__;
@@ -519,11 +526,7 @@ void FCEUD_TraceInstruction() {
 }
 
 
-#ifdef _GTK
-	int noGui = 0;
-#else
-	int noGui = 1;
-#endif
+int noGui = 1;
 
 int KillFCEUXonFrame = 0;
 
@@ -532,32 +535,12 @@ int KillFCEUXonFrame = 0;
  */
 int main(int argc, char *argv[])
 {
-  // this is a hackish check for the --help arguemnts
-  // these are normally processed by the config parser, but SDL_Init
-  // must be run before the config parser: so if even SDL_Init fails,
-  // these six lines will still print the help output
-	SDL_Log("fceux game start");
-	if(argc > 1)
-	{
-		if(!strcmp(argv[1], "--help") || !strcmp(argv[1],"-h"))
-		{
-            ShowUsage(argv[0]);
-			return 0;
-		}
-	}
-
 	int error, frameskip;
-
 	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
-
-#ifdef WIN32
-	/* Taken from win32 sdl_main.c */
-	SDL_SetModuleHandle(GetModuleHandle(NULL));
-#endif
 
 	/* SDL_INIT_VIDEO Needed for (joystick config) event processing? */
 	if(SDL_Init(SDL_INIT_VIDEO)) {
-		printf("Could not initialize SDL: %s.\n", SDL_GetError());
+		SDL_Log("Could not initialize SDL: %s.\n", SDL_GetError());
 		return(-1);
 	}
 
@@ -576,29 +559,13 @@ int main(int argc, char *argv[])
 	// initialize the infrastructure
 	error = FCEUI_Initialize();
 	if(error != 1) {
+		SDL_Log("FCUI_Initialize failed errno:%d", error);
 		ShowUsage(argv[0]);
 		SDL_Quit();
 		return -1;
 	}
 	
-	// check for --help or -h and display usage; also check for --nogui
-	for(int i=0; i<argc;i++)
-	{
-		if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
-		{
-			ShowUsage(argv[0]);
-			SDL_Quit();
-			return 0;
-		}
-#ifdef _GTK
-		else if(strcmp(argv[i], "--nogui") == 0)
-		{
-			noGui = 1;
-			argv[i] = "";
-		}
-#endif
-	}
-	int romIndex = g_config->parse(argc, argv);
+//	int romIndex = g_config->parse(argc, argv);
 
 	// This is here so that a default fceux.cfg will be created on first
 	// run, even without a valid ROM to play.
@@ -813,16 +780,14 @@ int main(int argc, char *argv[])
    
 
 	// if we're not compiling w/ the gui, exit if a rom isn't specified
-#ifndef _GTK
-	if(romIndex <= 0) {
-		
-		ShowUsage(argv[0]);
-		FCEUD_Message("\nError parsing command line arguments\n");
-		SDL_Quit();
-		return -1;
-	}
-#endif
-	
+//	if(romIndex <= 0) {
+//
+//		ShowUsage(argv[0]);
+//		FCEUD_Message("\nError parsing command line arguments\n");
+//		SDL_Quit();
+//		return -1;
+//	}
+
 
 	// update the emu core
 	UpdateEMUCore(g_config);
@@ -855,29 +820,30 @@ int main(int argc, char *argv[])
 	// load the hotkeys from the config life
 	setHotKeys();
 
-#ifdef _GTK
-	if(noGui == 0)
-	{
-		gtk_init(&argc, &argv);
-		InitGTKSubsystem(argc, argv);
-		while(gtk_events_pending())
-			gtk_main_iteration_do(FALSE);
-	}
-#endif
-
-  if(romIndex >= 0)
-	{
+//  error = LoadGame(argv[romIndex]);
+  char buf[80];
+  getcwd(buf, sizeof(buf));
+  error = LoadGame("/data/data/org.libsdl.app/files/F1.nes");//argv[romIndex]);
+  if(error != 1) {
+  	  SDL_Log("LoadGame error:%d\n", error);
+      DriverKill();
+      SDL_Quit();
+      return -1;
+  }
+  SDL_Log("LoadGame done");
+//  if(romIndex >= 0)
+//	{
 		// load the specified game
-		error = LoadGame(argv[romIndex]);
-		if(error != 1) {
-			DriverKill();
-			SDL_Quit();
-			return -1;
-		}
-		g_config->setOption("SDL.LastOpenFile", argv[romIndex]);
-		g_config->save();
+//		error = LoadGame(argv[romIndex]);
+//		if(error != 1) {
+//			DriverKill();
+//			SDL_Quit();
+//			return -1;
+//		}
+//		g_config->setOption("SDL.LastOpenFile", argv[romIndex]);
+//		g_config->save();
 
-	}
+//	}
 	
 	// movie playback
 	g_config->getOption("SDL.Movie", &s);
@@ -929,30 +895,10 @@ int main(int argc, char *argv[])
 
 	g_config->getOption("SDL.Frameskip", &frameskip);
 	// loop playing the game
-#ifdef _GTK
-	if(noGui == 0)
-	{
-		while(1)
-		{
-			if(GameInfo)
-				DoFun(frameskip, periodic_saves);
-			else
-				SDL_Delay(1);
-			while(gtk_events_pending())
-			gtk_main_iteration_do(FALSE);
-		}
-	}
-	else
-	{
-		while(GameInfo)
-			DoFun(frameskip, periodic_saves);
-	}
-#else
 	while(GameInfo)
 	{
 		DoFun(frameskip, periodic_saves);
 	}
-#endif
 	CloseGame();
 
 	// exit the infrastructure
@@ -977,46 +923,18 @@ uint64
 FCEUD_GetTimeFreq(void)
 {
 	// SDL_GetTicks() is in milliseconds
-	return 1000;
+	//return 1000;
+	return SDL_GetTicks();
 }
 
-/**
-* Prints a textual message without adding a newline at the end.
-*
-* @param text The text of the message.
-*
-* TODO: This function should have a better name.
-**/
 void FCEUD_Message(const char *text)
 {
-	fputs(text, stdout);
-#ifdef _GTK
-	pushOutputToGTK(text);
-#endif
+    SDL_Log("fceud message: %s\n", text);
 }
 
-/**
-* Shows an error message in a message box.
-* (For now: prints to stderr.)
-* 
-* If running in GTK mode, display a dialog message box of the error.
-*
-* @param errormsg Text of the error message.
-**/
 void FCEUD_PrintError(const char *errormsg)
 {
-#ifdef GTK
-	if(gtkIsStarted == true && noGui == 0)
-	{
-		GtkWidget* d;
-		d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, 
-                GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", errormsg);
-		gtk_dialog_run(GTK_DIALOG(d));
-		gtk_widget_destroy(d);
-	}
-#endif
-
-	fprintf(stderr, "%s\n", errormsg);
+    SDL_Log("fceud error: %s\n", errormsg);
 }
 
 
