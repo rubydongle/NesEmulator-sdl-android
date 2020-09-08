@@ -277,7 +277,7 @@ LOCAL_CFLAGS += \
 
 LOCAL_CPPFLAGS += -fexceptions
 
-LOCAL_LDLIBS := -ldl -lGLESv1_CM -lGLESv2 -landroid -lpthread
+LOCAL_LDLIBS := -ldl -lGLESv1_CM -lGLESv2 -landroid
 
 # -lz -lm
 #-lrt

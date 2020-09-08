@@ -64,6 +64,7 @@ static int s_curbpp;
 static int s_srendline, s_erendline;
 static int s_tlines;
 static int s_inited;
+static int initBlitToHighDone = 0;
 
 #ifdef OPENGL
 static int s_useOpenGL;
@@ -153,10 +154,90 @@ void FCEUD_VideoChanged()
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 int InitVideo(FCEUGI *gi)
 {
+	int vdSel;
+	int doublebuf, xstretch, ystretch, xres, yres, show_fps;
+
+	FCEUI_printf("Initializing video...");
+
+	// load the relevant configuration variables
+	g_config->getOption("SDL.Fullscreen", &s_fullscreen);
+	g_config->getOption("SDL.DoubleBuffering", &doublebuf);
+
+	//g_config->getOption("SDL.SpecialFilter", &s_sponge);
+	g_config->getOption("SDL.XStretch", &xstretch);
+	g_config->getOption("SDL.YStretch", &ystretch);
+	g_config->getOption("SDL.LastXRes", &xres);
+	g_config->getOption("SDL.LastYRes", &yres);
+	g_config->getOption("SDL.ClipSides", &s_clipSides);
+	g_config->getOption("SDL.NoFrame", &noframe);
+	g_config->getOption("SDL.ShowFPS", &show_fps);
+	//g_config->getOption("SDL.XScale", &s_exs);
+	//g_config->getOption("SDL.YScale", &s_eys);
+	uint32_t  rmask, gmask, bmask;
+
+	s_sponge = 0;
+	s_exs = 1.0;
+	s_eys = 1.0;
+//	xres = gtk_draw_area_width;
+//	yres = gtk_draw_area_height;
+	xres = 1024;//gtk_draw_area_width;
+	yres = 1024;//gtk_draw_area_height;
+	// check the starting, ending, and total scan lines
+
+	FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
+	s_tlines = s_erendline - s_srendline + 1;
+
+//	g_config->getOption("SDL.VideoDriver", &vdSel);
+//
+//	init_gui_video( (videoDriver_t)vdSel );
+
+	s_inited = 1;
+
+	// check to see if we are showing FPS
+	FCEUI_SetShowFPS(show_fps);
+
+#ifdef LSB_FIRST
+	rmask = 0x00FF0000;
+	gmask = 0x0000FF00;
+	bmask = 0x000000FF;
+#else
+	rmask = 0x00FF0000;
+	gmask = 0x0000FF00;
+	bmask = 0x000000FF;
+#endif
+
+	s_curbpp = 32; // Bits per pixel is always 32
+
+	FCEU_printf(" Video Mode: %d x %d x %d bpp %s\n",
+				xres, yres, s_curbpp,
+				s_fullscreen ? "full screen" : "");
+
+	if (s_curbpp != 8 && s_curbpp != 16 && s_curbpp != 24 && s_curbpp != 32)
+	{
+		FCEU_printf("  Sorry, %dbpp modes are not supported by FCE Ultra.  Supported bit depths are 8bpp, 16bpp, and 32bpp.\n", s_curbpp);
+		KillVideo();
+		return -1;
+	}
+
+	if ( !initBlitToHighDone )
+	{
+		InitBlitToHigh(s_curbpp >> 3,
+					   rmask,
+					   gmask,
+					   bmask,
+					   s_eefx, s_sponge, 0);
+
+		initBlitToHighDone = 1;
+	}
+
+	return 0;
+}
+//int InitVideo(FCEUGI *gi)
+//{
 	// This is a big TODO.  Stubbing this off into its own function,
 	// as the SDL surface routines have changed drastically in SDL2
 	// TODO - SDL2
-}
+//}
 #else
 /**
  * Attempts to initialize the graphical video display.  Returns 0 on
@@ -218,7 +299,7 @@ InitVideo(FCEUGI *gi)
 	if(vinf->hw_available) {
 		flags |= SDL_HWSURFACE;
 	}
-    
+
 	// get the monitor's current resolution if we do not already have it
 	if(s_nativeWidth < 0) {
 		s_nativeWidth = vinf->current_w;
