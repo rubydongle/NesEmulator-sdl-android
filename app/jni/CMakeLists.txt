@@ -10,6 +10,8 @@ project(GAME)
 # SDL sources are in a subfolder named "SDL"
 add_subdirectory(SDL)
 
+add_subdirectory(fceux)
+
 # Compilation of companion libraries
 #add_subdirectory(SDL_image)
 #add_subdirectory(SDL_mixer)
