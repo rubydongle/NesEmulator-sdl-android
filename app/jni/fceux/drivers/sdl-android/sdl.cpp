@@ -264,6 +264,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
 
 static void DoFun(int frameskip, int periodic_saves)
 {
+    SDL_Log("%s", __FUNCTION__);
 	uint8 *gfx;
 	int32 *sound;
 	int32 ssize;
@@ -488,19 +489,7 @@ EMUFILE_FILE* FCEUD_UTF8_fstream(const char *fn, const char *m)
  */
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode)
 {
-//	SDL_Log("->FCEUD_UTF8fopen");
-//	SDL_RWops *rwops = SDL_RWFromFile(fn, mode);
-//	AAsset *assetFile = AAssetManager_open(nativeasset, "F1.nes", AASSET_MODE_BUFFER);
-//	size_t fileLength = AAsset_getLength(assetFile);
-//	LOGD("before fd fileLength:%d",fileLength);
-//
-//	off_t start = 0, length = 0;
-//	int fd = AAsset_openFileDescriptor(assetFile, &start, &length);
-//
-//	return(fdopen(fd, mode));
-//    FILE *fp = rwops->hidden.stdio.fp;
 	return(fopen(fn,mode));
-//    return fp;
 }
 
 static char *s_linuxCompilerString = "g++ " __VERSION__;
@@ -530,10 +519,57 @@ int noGui = 1;
 
 int KillFCEUXonFrame = 0;
 
+int main(int argc, char *argv[]) {
+	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
+	if(SDL_Init(SDL_INIT_VIDEO)) {
+		SDL_Log("Could not initialize SDL: %s.\n", SDL_GetError());
+		return(-1);
+	}
+
+	g_config = InitConfig();
+	if(!g_config) {
+		SDL_Quit();
+		SDL_Log("InitConfig Failed\n");
+		return -1;
+	}
+
+	int error = FCEUI_Initialize();
+	if(error != 1) {
+		SDL_Log("FCUI_Initialize failed errno:%d", error);
+		SDL_Quit();
+		return -1;
+	}
+	UpdateInput(g_config);
+	UpdateEMUCore(g_config);
+	setHotKeys();
+
+	error = LoadGame("/data/data/org.libsdl.app/files/F1.nes");
+	if(error != 1) {
+		SDL_Log("LoadGame error:%d\n", error);
+		DriverKill();
+		SDL_Quit();
+		return -1;
+	}
+	SDL_Log("LoadGame done");
+
+	int frameskip = 0;
+	int periodic_saves = 0;
+	while(GameInfo)
+	{
+		DoFun(frameskip, periodic_saves);
+	}
+	CloseGame();
+
+	// exit the infrastructure
+	FCEUI_Kill();
+	SDL_Quit();
+	return 0;
+
+}
 /**
  * The main loop for the SDL.
  */
-int main(int argc, char *argv[])
+int Wmain(int argc, char *argv[])
 {
 	int error, frameskip;
 	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
@@ -543,10 +579,6 @@ int main(int argc, char *argv[])
 		SDL_Log("Could not initialize SDL: %s.\n", SDL_GetError());
 		return(-1);
 	}
-
-#ifdef OPENGL
-	SDL_GL_LoadLibrary(0);
-#endif
 
 	// Initialize the configuration system
 	g_config = InitConfig();
@@ -579,69 +611,51 @@ int main(int argc, char *argv[])
 	
 	std::string s;
 
-	g_config->getOption("SDL.InputCfg", &s);
-	if(s.size() != 0)
-	{
-	InitVideo(GameInfo);
-	InputCfg(s);
-	}
+//	g_config->getOption("SDL.InputCfg", &s);
+//	if(s.size() != 0)
+//	{
+//	    InitVideo(GameInfo);
+//	    InputCfg(s);
+//	}
 	// set the FAMICOM PAD 2 Mic thing 
-	{
-	int t;
-	g_config->getOption("SDL.Input.FamicomPad2.EnableMic", &t);
-		if(t)
-			replaceP2StartWithMicrophone = t;
-	}
 
     // update the input devices
 	UpdateInput(g_config);
 
-	// check if opengl is enabled with a scaler and display an error and bail	
-	int opengl;
-	int scaler;
-	g_config->getOption("SDL.OpenGL", &opengl);
-	g_config->getOption("SDL.SpecialFilter", &scaler);
-	if(opengl && scaler)
-	{
-		printf("Scalers are not supported in OpenGL mode.  Terminating.\n");
-		exit(2);
-	}
-
-
 	// check for a .fcm file to convert to .fm2
-	g_config->getOption ("SDL.FCMConvert", &s);
-	g_config->setOption ("SDL.FCMConvert", "");
-	if (!s.empty())
-	{
-		int okcount = 0;
-		std::string infname = s.c_str();
-		// produce output filename
-		std::string outname;
-		size_t dot = infname.find_last_of (".");
-		if (dot == std::string::npos)
-			outname = infname + ".fm2";
-		else
-			outname = infname.substr(0,dot) + ".fm2";
+//	g_config->getOption ("SDL.FCMConvert", &s);
+//	g_config->setOption ("SDL.FCMConvert", "");
+//	if (!s.empty())
+//	{
+//		int okcount = 0;
+//		std::string infname = s.c_str();
+//		// produce output filename
+//		std::string outname;
+//		size_t dot = infname.find_last_of (".");
+//		if (dot == std::string::npos)
+//			outname = infname + ".fm2";
+//		else
+//			outname = infname.substr(0,dot) + ".fm2";
+//
+//		MovieData md;
+//		EFCM_CONVERTRESULT result = convert_fcm (md, infname);
+//
+//		if (result == FCM_CONVERTRESULT_SUCCESS) {
+//			okcount++;
+//        // *outf = new EMUFILE;
+//		EMUFILE_FILE* outf = FCEUD_UTF8_fstream (outname, "wb");
+//		md.dump (outf,false);
+//		delete outf;
+//		FCEUD_Message ("Your file has been converted to FM2.\n");
+//	}
+//	else {
+//		FCEUD_Message ("Something went wrong while converting your file...\n");
+//	}
 	  
-		MovieData md;
-		EFCM_CONVERTRESULT result = convert_fcm (md, infname);
-
-		if (result == FCM_CONVERTRESULT_SUCCESS) {
-			okcount++;
-        // *outf = new EMUFILE;
-		EMUFILE_FILE* outf = FCEUD_UTF8_fstream (outname, "wb");
-		md.dump (outf,false);
-		delete outf;
-		FCEUD_Message ("Your file has been converted to FM2.\n");
-	}
-	else {
-		FCEUD_Message ("Something went wrong while converting your file...\n");
-	}
-	  
-	DriverKill();
-	  SDL_Quit();
-	  return 0;
-	}
+//	  DriverKill();
+//	  SDL_Quit();
+//	  return 0;
+//	}
 
 	// If x/y res set to 0, store current display res in SDL.LastX/YRes
 	int yres, xres;
@@ -682,130 +696,8 @@ int main(int argc, char *argv[])
 		g_config->setOption("SDL.LastYRes", yres);
 	}
 #endif
-	
-	int autoResume;
-	g_config->getOption("SDL.AutoResume", &autoResume);
-	if(autoResume)
-	{
-		AutoResumePlay = true;
-	}
-	else
-	{
-		AutoResumePlay = false;
-	}
-	// check to see if recording HUD to AVI is enabled
-	int rh;
-	g_config->getOption("SDL.RecordHUD", &rh);
-	if( rh == 0)
-		FCEUI_SetAviEnableHUDrecording(true);
-	else
-		FCEUI_SetAviEnableHUDrecording(false);
-
-	// check to see if movie messages are disabled
-	int mm;
-	g_config->getOption("SDL.MovieMsg", &mm);
-	if( mm == 0)
-		FCEUI_SetAviDisableMovieMessages(true);
-	else
-		FCEUI_SetAviDisableMovieMessages(false);
-	
-	
-	// check for a .fm2 file to rip the subtitles
-	g_config->getOption("SDL.RipSubs", &s);
-	g_config->setOption("SDL.RipSubs", "");
-	if (!s.empty())
-	{
-		MovieData md;
-		std::string infname;
-		infname = s.c_str();
-		FCEUFILE *fp = FCEU_fopen(s.c_str(), 0, "rb", 0);
-		
-		// load the movie and and subtitles
-		extern bool LoadFM2(MovieData&, EMUFILE*, int, bool);
-		LoadFM2(md, fp->stream, INT_MAX, false);
-		LoadSubtitles(md); // fill subtitleFrames and subtitleMessages
-		delete fp;
-		
-		// produce .srt file's name and open it for writing
-		std::string outname;
-		size_t dot = infname.find_last_of (".");
-		if (dot == std::string::npos)
-			outname = infname + ".srt";
-		else
-			outname = infname.substr(0,dot) + ".srt";
-		FILE *srtfile;
-		srtfile = fopen(outname.c_str(), "w");
-		
-		if (srtfile != NULL)
-		{
-			extern std::vector<int> subtitleFrames;
-			extern std::vector<std::string> subtitleMessages;
-			float fps = (md.palFlag == 0 ? 60.0988 : 50.0069); // NTSC vs PAL
-			float subduration = 3; // seconds for the subtitles to be displayed
-			for (int i = 0; i < subtitleFrames.size(); i++)
-			{
-				fprintf(srtfile, "%i\n", i+1); // starts with 1, not 0
-				double seconds, ms, endseconds, endms;
-				seconds = subtitleFrames[i]/fps;
-				if (i+1 < subtitleFrames.size()) // there's another subtitle coming after this one
-				{
-					if (subtitleFrames[i+1]-subtitleFrames[i] < subduration*fps) // avoid two subtitles at the same time
-					{
-						endseconds = (subtitleFrames[i+1]-1)/fps; // frame x: subtitle1; frame x+1 subtitle2
-					} else {
-						endseconds = seconds+subduration;
-							}
-				} else {
-					endseconds = seconds+subduration;
-				}
-				ms = modf(seconds, &seconds);
-				endms = modf(endseconds, &endseconds);
-				// this is just beyond ugly, don't show it to your kids
-				fprintf(srtfile,
-				"%02.0f:%02d:%02d,%03d --> %02.0f:%02d:%02d,%03d\n", // hh:mm:ss,ms --> hh:mm:ss,ms
-				floor(seconds/3600),	(int)floor(seconds/60   ) % 60, (int)floor(seconds)	% 60, (int)(ms*1000),
-				floor(endseconds/3600), (int)floor(endseconds/60) % 60, (int)floor(endseconds) % 60, (int)(endms*1000));
-				fprintf(srtfile, "%s\n\n", subtitleMessages[i].c_str()); // new line for every subtitle
-			}
-		fclose(srtfile);
-		printf("%d subtitles have been ripped.\n", (int)subtitleFrames.size());
-		} else {
-		FCEUD_Message("Couldn't create output srt file...\n");
-		}
-	  
-		DriverKill();
-		SDL_Quit();
-		return 0;
-	}
-   
-
-	// if we're not compiling w/ the gui, exit if a rom isn't specified
-//	if(romIndex <= 0) {
-//
-//		ShowUsage(argv[0]);
-//		FCEUD_Message("\nError parsing command line arguments\n");
-//		SDL_Quit();
-//		return -1;
-//	}
-
-
 	// update the emu core
 	UpdateEMUCore(g_config);
-
-	
-	#ifdef CREATE_AVI
-	g_config->getOption("SDL.VideoLog", &s);
-	g_config->setOption("SDL.VideoLog", "");
-	if(!s.empty())
-	{
-		NESVideoSetVideoCmd(s.c_str());
-		LoggingEnabled = 1;
-		g_config->getOption("SDL.MuteCapture", &mutecapture);
-	} else {
-		mutecapture = 0;
-	}
-	#endif
-
 	{
 		int id;
 		g_config->getOption("SDL.InputDisplay", &id);
@@ -820,31 +712,16 @@ int main(int argc, char *argv[])
 	// load the hotkeys from the config life
 	setHotKeys();
 
-//  error = LoadGame(argv[romIndex]);
-  char buf[80];
-  getcwd(buf, sizeof(buf));
-  error = LoadGame("/data/data/org.libsdl.app/files/F1.nes");//argv[romIndex]);
-  if(error != 1) {
-  	  SDL_Log("LoadGame error:%d\n", error);
-      DriverKill();
-      SDL_Quit();
-      return -1;
-  }
-  SDL_Log("LoadGame done");
-//  if(romIndex >= 0)
-//	{
-		// load the specified game
-//		error = LoadGame(argv[romIndex]);
-//		if(error != 1) {
-//			DriverKill();
-//			SDL_Quit();
-//			return -1;
-//		}
-//		g_config->setOption("SDL.LastOpenFile", argv[romIndex]);
-//		g_config->save();
-
-//	}
-	
+    char buf[80];
+    getcwd(buf, sizeof(buf));
+    error = LoadGame("/data/data/org.libsdl.app/files/F1.nes");//argv[romIndex]);
+    if(error != 1) {
+        SDL_Log("LoadGame error:%d\n", error);
+        DriverKill();
+        SDL_Quit();
+        return -1;
+    }
+    SDL_Log("LoadGame done");
 	// movie playback
 	g_config->getOption("SDL.Movie", &s);
 	g_config->setOption("SDL.Movie", "");
@@ -875,17 +752,7 @@ int main(int argc, char *argv[])
     } else {
         periodic_saves = 0;
     }
-	
-#ifdef _S9XLUA_H
-	// load lua script if option passed
-	g_config->getOption("SDL.LuaScript", &s);
-	g_config->setOption("SDL.LuaScript", "");
-	if (s != "")
-	{
-		FCEU_LoadLuaCode(s.c_str());
-	}
-#endif
-	
+
 	{
 		int id;
 		g_config->getOption("SDL.NewPPU", &id);
