@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_alignParentBottom="true">
+
+    <Button
+        android:id="@+id/buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="S" />
+
+    <Button
+        android:id="@+id/buttonf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="F" />
+
+    <Button
+        android:id="@+id/buttonenter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter" />
+
+    <Button
+        android:id="@+id/buttonleft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Left" />
+    <Button
+        android:id="@+id/buttonright"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Right" />
+</LinearLayout>
