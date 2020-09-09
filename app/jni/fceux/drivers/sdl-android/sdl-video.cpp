@@ -56,6 +56,8 @@ extern Config *g_config;
 
 // STATIC GLOBALS
 extern SDL_Surface *s_screen;
+extern SDL_Window *s_window;
+extern SDL_Renderer *s_renderer;
 
 static SDL_Surface *s_BlitBuf; // Buffer when using hardware-accelerated blits.
 static SDL_Surface *s_IconSurface = NULL;
@@ -128,7 +130,7 @@ KillVideo()
 
 
 // this variable contains information about the special scaling filters
-static int s_sponge;
+static int s_sponge = 0;
 
 /**
  * These functions determine an appropriate scale factor for fullscreen/
@@ -154,48 +156,62 @@ void FCEUD_VideoChanged()
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 int InitVideo(FCEUGI *gi)
 {
-	int vdSel;
-	int doublebuf, xstretch, ystretch, xres, yres, show_fps;
+	// This is a big TODO.  Stubbing this off into its own function,
+	// as the SDL surface routines have changed drastically in SDL2
+	// TODO - SDL2
 
-	FCEUI_printf("Initializing video...");
-
-	// load the relevant configuration variables
-	g_config->getOption("SDL.Fullscreen", &s_fullscreen);
-	g_config->getOption("SDL.DoubleBuffering", &doublebuf);
-
-	//g_config->getOption("SDL.SpecialFilter", &s_sponge);
-	g_config->getOption("SDL.XStretch", &xstretch);
-	g_config->getOption("SDL.YStretch", &ystretch);
-	g_config->getOption("SDL.LastXRes", &xres);
-	g_config->getOption("SDL.LastYRes", &yres);
-	g_config->getOption("SDL.ClipSides", &s_clipSides);
-	g_config->getOption("SDL.NoFrame", &noframe);
-	g_config->getOption("SDL.ShowFPS", &show_fps);
-	//g_config->getOption("SDL.XScale", &s_exs);
-	//g_config->getOption("SDL.YScale", &s_eys);
-	uint32_t  rmask, gmask, bmask;
-
-	s_sponge = 0;
-	s_exs = 1.0;
-	s_eys = 1.0;
-//	xres = gtk_draw_area_width;
-//	yres = gtk_draw_area_height;
-	xres = 1024;//gtk_draw_area_width;
-	yres = 1024;//gtk_draw_area_height;
-	// check the starting, ending, and total scan lines
+	int error;
+	s_curbpp = 32;
+	// 创建一个窗口
+	s_window = SDL_CreateWindow("fceux game window" , SDL_WINDOWPOS_CENTERED,
+							  SDL_WINDOWPOS_CENTERED, 0, 0, SDL_WINDOW_SHOWN);
+	// 创建一个渲染器
+	s_renderer = SDL_CreateRenderer(s_window, -1, 0);
+	int xres, yres;
+	SDL_GetWindowSize(s_window, &xres, &yres);
+	s_texture = SDL_CreateTexture(s_renderer,
+								   SDL_PIXELFORMAT_ARGB8888,
+								   SDL_TEXTUREACCESS_STREAMING,
+								   xres, yres);
+//	SDL_SetRenderDrawColor(s_renderer, 255, 0, 0, 255);
+//	SDL_RenderClear(s_renderer);
+//	SDL_RenderPresent(s_renderer);
 
 	FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
 	s_tlines = s_erendline - s_srendline + 1;
 
-//	g_config->getOption("SDL.VideoDriver", &vdSel);
-//
-//	init_gui_video( (videoDriver_t)vdSel );
-
+	if (!SDL_WasInit(SDL_INIT_VIDEO)) {
+		error = SDL_InitSubSystem(SDL_INIT_VIDEO);
+		if (error) {
+			FCEUD_PrintError(SDL_GetError());
+			return -1;
+		}
+	}
 	s_inited = 1;
 
-	// check to see if we are showing FPS
-	FCEUI_SetShowFPS(show_fps);
+	double auto_xscale;// = GetXScale(xres);
+	double auto_yscale;// = GetYScale(yres);
+	double native_ratio = ((double)NWIDTH) / s_tlines;
+	double screen_ratio = ((double)xres) / yres;
+	int keep_ratio = 0;
 
+	if (screen_ratio < native_ratio) {
+		auto_xscale = auto_yscale = GetXScale(xres);
+		if (keep_ratio) {
+			auto_yscale = GetYScale(yres);
+		}
+	} else {
+		auto_yscale = auto_xscale = GetYScale(xres);
+		if (keep_ratio) {
+			auto_xscale = GetXScale(yres);
+		}
+	}
+	s_exs = auto_xscale;
+	s_eys = auto_yscale;
+	s_eefx = 0;
+
+	uint32_t  rmask, gmask, bmask, amask;
+	amask = 0xFF000000;
 #ifdef LSB_FIRST
 	rmask = 0x00FF0000;
 	gmask = 0x0000FF00;
@@ -205,39 +221,41 @@ int InitVideo(FCEUGI *gi)
 	gmask = 0x0000FF00;
 	bmask = 0x000000FF;
 #endif
+	s_BlitBuf = SDL_CreateRGBSurface(0, xres, yres,
+									 s_curbpp,
+									 rmask,
+									 gmask,
+									 bmask, amask);
 
-	s_curbpp = 32; // Bits per pixel is always 32
+//	s_texture = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, xres, yres);
 
-	FCEU_printf(" Video Mode: %d x %d x %d bpp %s\n",
-				xres, yres, s_curbpp,
-				s_fullscreen ? "full screen" : "");
+	InitBlitToHigh(s_curbpp >> 3,
+				   rmask,
+				   gmask,
+				   bmask,
+				   s_eefx, s_sponge, 0);
 
-	if (s_curbpp != 8 && s_curbpp != 16 && s_curbpp != 24 && s_curbpp != 32)
-	{
-		FCEU_printf("  Sorry, %dbpp modes are not supported by FCE Ultra.  Supported bit depths are 8bpp, 16bpp, and 32bpp.\n", s_curbpp);
-		KillVideo();
-		return -1;
-	}
+	// 创建一个Surface
+//	SDL_Surface *bmpSurface = SDL_LoadBMP("sdl.bmp" );
+//	SDL_Log("after SDL_loadBMP");
+	//设置图片中的白色为透明色
+//	SDL_SetColorKey(bmpSurface, SDL_TRUE, 0xffffff);
+	// 创建一个Texture
+//	SDL_Texture *texture = SDL_CreateTextureFromSurface(s_renderer, bmpSurface);
+//	SDL_Log("after SDL_CreateTextureFromSurface");
+	//清除所有事件
+//	SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
 
-	if ( !initBlitToHighDone )
-	{
-		InitBlitToHigh(s_curbpp >> 3,
-					   rmask,
-					   gmask,
-					   bmask,
-					   s_eefx, s_sponge, 0);
-
-		initBlitToHighDone = 1;
-	}
+	//使用红色填充背景
+//	SDL_SetRenderDrawColor(s_renderer, 255, 0, 0, 255);
+//	SDL_RenderClear(s_renderer);
+	// 将纹理布置到渲染器
+//	SDL_RenderCopy(s_renderer, texture, NULL, NULL);
+	// 刷新屏幕
+//	SDL_RenderPresent(s_renderer);
 
 	return 0;
 }
-//int InitVideo(FCEUGI *gi)
-//{
-	// This is a big TODO.  Stubbing this off into its own function,
-	// as the SDL surface routines have changed drastically in SDL2
-	// TODO - SDL2
-//}
 #else
 /**
  * Attempts to initialize the graphical video display.  Returns 0 on
@@ -706,36 +724,12 @@ void UnlockConsole(){}
 void
 BlitScreen(uint8 *XBuf)
 {
+    SDL_Log("%s XBuf size: %d\n", __FUNCTION__, sizeof(XBuf));
 	SDL_Surface *TmpScreen;
 	uint8 *dest;
 	int xo = 0, yo = 0;
-
-	if(!s_screen) {
-		return;
-	}
-
-	// refresh the palette if required
-	if(s_paletterefresh) {
-		RedoPalette();
-		s_paletterefresh = 0;
-	}
-
-#ifdef OPENGL
-	// OpenGL is handled separately
-	if(s_useOpenGL) {
-		BlitOpenGL(XBuf);
-		return;
-	}
-#endif
-
-	// XXX soules - not entirely sure why this is being done yet
 	XBuf += s_srendline * 256;
-
-	if(s_BlitBuf) {
-		TmpScreen = s_BlitBuf;
-	} else {
-		TmpScreen = s_screen;
-	}
+	TmpScreen = s_BlitBuf;
 
 	// lock the display, if necessary
 	if(SDL_MUSTLOCK(TmpScreen)) {
@@ -745,14 +739,11 @@ BlitScreen(uint8 *XBuf)
 	}
 
 	dest = (uint8*)TmpScreen->pixels;
-
-	if(s_fullscreen) {
-		xo = (int)(((TmpScreen->w - NWIDTH * s_exs)) / 2);
-		dest += xo * (s_curbpp >> 3);
-		if(TmpScreen->h > (s_tlines * s_eys)) {
-			yo = (int)((TmpScreen->h - s_tlines * s_eys) / 2);
-			dest += yo * TmpScreen->pitch;
-		}
+	xo = (int)(((TmpScreen->w - NWIDTH * s_exs)) / 2);
+	dest += xo * (s_curbpp >> 3);
+	if(TmpScreen->h > (s_tlines * s_eys)) {
+		yo = (int)((TmpScreen->h - s_tlines * s_eys) / 2);
+		dest += yo * TmpScreen->pitch;
 	}
 
 	// XXX soules - again, I'm surprised SDL can't handle this
@@ -781,121 +772,10 @@ BlitScreen(uint8 *XBuf)
 		SDL_UnlockSurface(TmpScreen);
 	}
 
-	int scrw;
-	if(s_sponge == 3) {  // NTSC 2x
-		scrw = 301;
-	} else {
-		scrw = NWIDTH;
-	}
-
-	 // if we have a hardware video buffer, do a fast video->video copy
-	if(s_BlitBuf) {
-		SDL_Rect srect;
-		SDL_Rect drect;
-
-		srect.x = 0;
-		srect.y = 0;
-		srect.w = scrw;
-		srect.h = s_tlines;
-
-		drect.x = 0;
-		drect.y = 0;
-		drect.w = (Uint16)(s_exs * scrw);
-		drect.h = (Uint16)(s_eys * s_tlines);
-
-		SDL_BlitSurface(s_BlitBuf, &srect, s_screen, &drect);
-	}
-
-	 // ensure that the display is updated
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	//TODO - SDL2
-#else
-	SDL_UpdateRect(s_screen, xo, yo,
-				(Uint32)(scrw * s_exs), (Uint32)(s_tlines * s_eys));
-#endif
-
-#ifdef CREATE_AVI
-#if 0 /* PAL INTO NTSC HACK */
- { int fps = FCEUI_GetDesiredFPS();
- if(FCEUI_GetDesiredFPS() == 838977920) fps = 1008307711;
- NESVideoLoggingVideo(s_screen->pixels, width,height, fps, s_curbpp);
- if(FCEUI_GetDesiredFPS() == 838977920)
- {
-   static unsigned dup=0;
-   if(++dup==5) { dup=0;
-   NESVideoLoggingVideo(s_screen->pixels, width,height, fps, s_curbpp); }
- } }
-#else
- { int fps = FCEUI_GetDesiredFPS();
-   static unsigned char* result = NULL;
-   static unsigned resultsize = 0;
-   int width = NWIDTH, height = s_tlines;
-   if(!result || resultsize != width*height*3*2)
-   {
-       if(result) free(result);
-       result = (unsigned char*) FCEU_dmalloc(resultsize = width*height*3*2);
-   }
-   switch(s_curbpp)
-   {
-   #if 0
-     case 24: case 32: case 15: case 16:
-       /* Convert to I420 if possible, because our I420 conversion is optimized
-        * and it'll produce less network traffic, hence faster throughput than
-        * anything else. And H.264 eats only I420, so it'd be converted sooner
-        * or later anyway if we didn't do it. Win-win situation.
-        */
-       switch(s_curbpp)
-       {
-         case 32: Convert32To_I420Frame(s_screen->pixels, &result[0], width*height, width); break;
-         case 24: Convert24To_I420Frame(s_screen->pixels, &result[0], width*height, width); break;
-         case 15: Convert15To_I420Frame(s_screen->pixels, &result[0], width*height, width); break;
-         case 16: Convert16To_I420Frame(s_screen->pixels, &result[0], width*height, width); break;
-       }
-       NESVideoLoggingVideo(&result[0], width,height, fps, 12);
-       break;
-   #endif
-     default:
-       NESVideoLoggingVideo(s_screen->pixels, width,height, fps, s_curbpp);
-   }
- }
-#endif
-
-#if REALTIME_LOGGING
- {
-   static struct timeval last_time;
-   static int first_time=1;
-   extern long soundrate;
-   
-   struct timeval cur_time;
-   gettimeofday(&cur_time, NULL);
-   
-   double timediff =
-       (cur_time.tv_sec *1e6 + cur_time.tv_usec
-     - (last_time.tv_sec *1e6 + last_time.tv_usec)) / 1e6;
-   
-   int nframes = timediff * 60 - 1;
-   if(first_time)
-     first_time = 0;
-   else while(nframes > 0)
-   {
-     static const unsigned char Buf[800*4] = {0};
-     NESVideoLoggingVideo(screen->pixels, 256,tlines, FCEUI_GetDesiredFPS(), s_curbpp);
-     NESVideoLoggingAudio(Buf, soundrate,16,1, soundrate/60.0);
-     --nframes;
-   }
-   memcpy(&last_time, &cur_time, sizeof(last_time));
- }
-#endif
-#endif
-
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	// TODO
-#else
-    // have to flip the displayed buffer in the case of double buffering
-	if(s_screen->flags & SDL_DOUBLEBUF) {
-		SDL_Flip(s_screen);
-	}
-#endif
+	SDL_UpdateTexture(s_texture, NULL, TmpScreen->pixels, TmpScreen->pitch);
+	SDL_RenderClear(s_renderer);
+	SDL_RenderCopy(s_renderer, s_texture, NULL, NULL);
+	SDL_RenderPresent(s_renderer);
 }
 
 /**
