@@ -161,6 +161,7 @@ int InitVideo(FCEUGI *gi)
 	// TODO - SDL2
 
 	int error;
+	s_paletterefresh = 1;
 	s_curbpp = 32;
 	// 创建一个窗口
 	s_window = SDL_CreateWindow("fceux game window" , SDL_WINDOWPOS_CENTERED,
@@ -731,6 +732,12 @@ BlitScreen(uint8 *XBuf)
 	XBuf += s_srendline * 256;
 	TmpScreen = s_BlitBuf;
 
+	if (s_paletterefresh)
+	{
+		RedoPalette();
+		s_paletterefresh = 0;
+	}
+
 	// lock the display, if necessary
 	if(SDL_MUSTLOCK(TmpScreen)) {
 		if(SDL_LockSurface(TmpScreen) < 0) {
@@ -739,33 +746,37 @@ BlitScreen(uint8 *XBuf)
 	}
 
 	dest = (uint8*)TmpScreen->pixels;
-	xo = (int)(((TmpScreen->w - NWIDTH * s_exs)) / 2);
-	dest += xo * (s_curbpp >> 3);
-	if(TmpScreen->h > (s_tlines * s_eys)) {
-		yo = (int)((TmpScreen->h - s_tlines * s_eys) / 2);
-		dest += yo * TmpScreen->pitch;
-	}
+//	xo = (int)(((TmpScreen->w - NWIDTH * s_exs)) / 2);
+//	dest += xo * (s_curbpp >> 3);
+//	if(TmpScreen->h > (s_tlines * s_eys)) {
+//		yo = (int)((TmpScreen->h - s_tlines * s_eys) / 2);
+//		dest += yo * TmpScreen->pitch;
+//	}
 
 	// XXX soules - again, I'm surprised SDL can't handle this
 	// perform the blit, converting bpp if necessary
-	if(s_curbpp > 8) {
-		if(s_BlitBuf) {
-			Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-						TmpScreen->pitch, 1, 1);
-		} else {
-			Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-						TmpScreen->pitch, (int)s_exs, (int)s_eys);
-		}
-	} else {
-		if(s_BlitBuf) {
-			Blit8To8(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-					TmpScreen->pitch, 1, 1, 0, s_sponge);
-		} else {
-			Blit8To8(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-					TmpScreen->pitch, (int)s_exs, (int)s_eys,
-					s_eefx, s_sponge);
-		}
-	}
+//	if(s_curbpp > 8) {
+//		if(s_BlitBuf) {
+//			Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
+//						TmpScreen->pitch, 1, 1);
+//		} else {
+//			Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
+//						TmpScreen->pitch, (int)s_exs, (int)s_eys);
+//		}
+//	} else {
+//		if(s_BlitBuf) {
+//			Blit8To8(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
+//					TmpScreen->pitch, 1, 1, 0, s_sponge);
+//		} else {
+//			Blit8To8(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
+//					TmpScreen->pitch, (int)s_exs, (int)s_eys,
+//					s_eefx, s_sponge);
+//		}
+//	}
+
+
+	Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
+				TmpScreen->pitch, (int)s_exs, (int)s_eys);
 
 	// unlock the display, if necessary
 	if(SDL_MUSTLOCK(TmpScreen)) {
