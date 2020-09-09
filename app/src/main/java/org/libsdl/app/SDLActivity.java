@@ -271,59 +271,69 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             }
         } catch(Exception ignored) {
         }
-//
-//        Button button = new Button(this);
-//        button.setText("click me S");
-//        button.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View view, MotionEvent motionEvent) {
-//                switch (motionEvent.getAction()) {
-//                    case MotionEvent.ACTION_DOWN:
-//                        onNativeKeyDown(KeyEvent.KEYCODE_S);
-//                        break;
-//                    case MotionEvent.ACTION_UP:
-//                        onNativeKeyUp(KeyEvent.KEYCODE_S);
-//                        break;
-//                }
-//                return true;
-//            }
-//        });
-//        mLayout.addView(button);
-//
-//        Button buttonEnter = new Button(this);
-//        buttonEnter.setText("click me Enter");
-//        buttonEnter.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View view, MotionEvent motionEvent) {
-//                switch (motionEvent.getAction()) {
-//                    case MotionEvent.ACTION_DOWN:
-//                        onNativeKeyDown(KeyEvent.KEYCODE_ENTER);
-//                        break;
-//                    case MotionEvent.ACTION_UP:
-//                        onNativeKeyUp(KeyEvent.KEYCODE_ENTER);
-//                        break;
-//                }
-//                return true;
-//            }
-//        });
-//        mLayout.addView(buttonEnter);
 
         View controlPad = LayoutInflater.from(this).inflate(R.layout.control_pad, null);
-        Button buttonF = controlPad.findViewById(R.id.buttonf);
-        buttonF.setOnTouchListener(new View.OnTouchListener() {
+        Button buttonUp = controlPad.findViewById(R.id.buttonup);
+        buttonUp.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        onNativeKeyDown(KeyEvent.KEYCODE_F);
+                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_UP);
                         break;
                     case MotionEvent.ACTION_UP:
-                        onNativeKeyUp(KeyEvent.KEYCODE_F);
+                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_UP);
                         break;
                 }
                 return true;
             }
         });
+        Button buttonDown = controlPad.findViewById(R.id.buttondown);
+        buttonDown.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_DOWN);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_DOWN);
+                        break;
+                }
+                return true;
+            }
+        });
+        Button buttonLeft = controlPad.findViewById(R.id.buttonleft);
+        buttonLeft.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_LEFT);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_LEFT);
+                        break;
+                }
+                return true;
+            }
+        });
+        Button buttonRight = controlPad.findViewById(R.id.buttonright);
+        buttonRight.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_RIGHT);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_RIGHT);
+                        break;
+                }
+                return true;
+            }
+        });
+
         Button buttonS = controlPad.findViewById(R.id.buttons);
         buttonS.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -354,37 +364,37 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 return true;
             }
         });
-        Button buttonLeft = controlPad.findViewById(R.id.buttonleft);
-        buttonLeft.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                switch (motionEvent.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_LEFT);//SOFT_LEFT);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_LEFT);
-                        break;
-                }
-                return true;
-            }
-        });
-        Button buttonRight = controlPad.findViewById(R.id.buttonright);
-        buttonRight.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                switch (motionEvent.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_RIGHT);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_RIGHT);
-                        break;
-                }
-                return true;
-            }
-        });
 
+        Button buttonD = controlPad.findViewById(R.id.buttond);
+        buttonD.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onNativeKeyDown(KeyEvent.KEYCODE_D);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        onNativeKeyUp(KeyEvent.KEYCODE_D);
+                        break;
+                }
+                return true;
+            }
+        });
+        Button buttonF = controlPad.findViewById(R.id.buttonf);
+        buttonF.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onNativeKeyDown(KeyEvent.KEYCODE_F);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        onNativeKeyUp(KeyEvent.KEYCODE_F);
+                        break;
+                }
+                return true;
+            }
+        });
         mLayout.addView(controlPad);
         setContentView(mLayout);
 
@@ -404,7 +414,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     }
 
     void copyGameToDataFiles() {
-        String gameName = "冒险岛4.nes";
+        String gameName = "F1.nes";
         InputStream in = null;
         FileOutputStream out = null;
         String path = this.getApplicationContext().getFilesDir()
