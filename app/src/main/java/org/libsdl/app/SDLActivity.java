@@ -271,7 +271,42 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             }
         } catch(Exception ignored) {
         }
-
+//
+//        Button button = new Button(this);
+//        button.setText("click me S");
+//        button.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View view, MotionEvent motionEvent) {
+//                switch (motionEvent.getAction()) {
+//                    case MotionEvent.ACTION_DOWN:
+//                        onNativeKeyDown(KeyEvent.KEYCODE_S);
+//                        break;
+//                    case MotionEvent.ACTION_UP:
+//                        onNativeKeyUp(KeyEvent.KEYCODE_S);
+//                        break;
+//                }
+//                return true;
+//            }
+//        });
+//        mLayout.addView(button);
+//
+        Button buttonEnter = new Button(this);
+        buttonEnter.setText("click me Enter");
+        buttonEnter.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onNativeKeyDown(KeyEvent.KEYCODE_ENTER);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        onNativeKeyUp(KeyEvent.KEYCODE_ENTER);
+                        break;
+                }
+                return true;
+            }
+        });
+        mLayout.addView(buttonEnter);
         setContentView(mLayout);
 
         setWindowStyle(false);
