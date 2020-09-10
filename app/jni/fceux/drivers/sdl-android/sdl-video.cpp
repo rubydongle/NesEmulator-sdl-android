@@ -194,7 +194,7 @@ int InitVideo(FCEUGI *gi)
 	double auto_yscale;// = GetYScale(yres);
 	double native_ratio = ((double)NWIDTH) / s_tlines;
 	double screen_ratio = ((double)xres) / yres;
-	int keep_ratio = 0;
+	int keep_ratio = 1;
 
 	if (screen_ratio < native_ratio) {
 		auto_xscale = auto_yscale = GetXScale(xres);

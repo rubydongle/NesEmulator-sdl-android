@@ -525,6 +525,8 @@ int main(int argc, char *argv[]) {
 		SDL_Log("Could not initialize SDL: %s.\n", SDL_GetError());
 		return(-1);
 	}
+	// 设置竖屏 参考SDLActivity中setOrientationBis
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft");
 
 	g_config = InitConfig();
 	if(!g_config) {
