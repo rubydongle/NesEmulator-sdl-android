@@ -1179,19 +1179,19 @@ UpdateGamepad(void)
                     }
 				}
 				JS |= (1 << x) << (wg << 3);
-
-				if (g_keyState[SDL_GetScancodeFromKey(SDLK_UP)])
-					JS |= (1 << 4) << (wg << 3);
-				if (g_keyState[SDL_GetScancodeFromKey(SDLK_DOWN)])
-					JS |= (1 << 5) << (wg << 3);
-				if (g_keyState[SDL_GetScancodeFromKey(SDLK_LEFT)])
-					JS |= (1 << 6) << (wg << 3);
-				if (g_keyState[SDL_GetScancodeFromKey(SDLK_RIGHT)])
-					JS |= (1 << 7) << (wg << 3);
 			}
+
+			if (g_keyState[SDL_GetScancodeFromKey(SDLK_UP)])
+				JS |= (1 << 4) << (wg << 3);
+			if (g_keyState[SDL_GetScancodeFromKey(SDLK_DOWN)])
+				JS |= (1 << 5) << (wg << 3);
+			if (g_keyState[SDL_GetScancodeFromKey(SDLK_LEFT)])
+				JS |= (1 << 6) << (wg << 3);
+			if (g_keyState[SDL_GetScancodeFromKey(SDLK_RIGHT)])
+				JS |= (1 << 7) << (wg << 3);
 		}
 
-        int four_button_exit;
+		int four_button_exit;
         g_config->getOption("SDL.ABStartSelectExit", &four_button_exit);
         // if a+b+start+select is pressed, exit
         if (four_button_exit && JS == 15) {

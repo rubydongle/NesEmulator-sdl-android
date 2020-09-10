@@ -422,7 +422,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     }
 
     void copyGameToDataFiles() {
-        String gameName = "F1.nes";
+        String gameName = "冒险岛4.nes";
         InputStream in = null;
         FileOutputStream out = null;
         String path = this.getApplicationContext().getFilesDir()

@@ -543,7 +543,7 @@ int main(int argc, char *argv[]) {
 	UpdateEMUCore(g_config);
 	setHotKeys();
 
-	error = LoadGame("/data/data/org.libsdl.app/files/F1.nes");
+	error = LoadGame("/data/data/org.libsdl.app/files/冒险岛4.nes");
 	if(error != 1) {
 		SDL_Log("LoadGame error:%d\n", error);
 		DriverKill();
