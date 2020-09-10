@@ -56,41 +56,41 @@
             android:id="@+id/buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/control_back"
-            android:text="select" />
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/select_icon"/>
+<!--            android:text="select" />-->
 
         <Button
             android:id="@+id/buttonenter"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/control_back"
-            android:text="start" />
+            android:layout_marginTop="10dp"
+            android:background="@drawable/start_icon" />
+<!--            android:text="start" />-->
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="164dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:layout_marginBottom="82dp"
-        android:layout_marginRight="50dp" >
+        android:layout_marginRight="80dp"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/buttond"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="50dp"
             android:background="@drawable/icon_b" />
-        <!--        android:text="B" />-->
 
         <Button
             android:id="@+id/buttonf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="50dp"
             android:background="@drawable/icon_a" />
         <!--        android:text="A" />-->
     </LinearLayout>

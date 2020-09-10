@@ -1,5 +1,9 @@
-<vector android:height="72dp" android:tint="?attr/colorControlNormal"
-    android:viewportHeight="24" android:viewportWidth="24"
-    android:width="72dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="@android:color/white" android:pathData="M12,4l-1.41,1.41L16.17,11H4v2h12.17l-5.58,5.59L12,20l8,-8z"/>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="71.98dp"
+    android:height="72dp"
+    android:viewportWidth="71.98"
+    android:viewportHeight="72">
+  <path
+      android:fillColor="@color/colorJoyButton"
+      android:pathData="M38.98,19.64l-0.01,-19.64l33.01,35.97l-32.95,36.03l-0.02,-19.64l-38.98,0.04l-0.03,-32.73l38.98,-0.03z"/>
 </vector>
