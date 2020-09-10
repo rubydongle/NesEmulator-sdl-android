@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Locale;
-import java.lang.reflect.Method;
 import java.lang.Math;
 
 import android.app.*;
