@@ -67,11 +67,12 @@
             android:text="start" />
     </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="164dp"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
         android:layout_marginBottom="82dp"
         android:layout_marginRight="50dp" >
 
@@ -92,6 +93,6 @@
             android:layout_centerVertical="true"
             android:background="@drawable/icon_a" />
         <!--        android:text="A" />-->
-    </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>
