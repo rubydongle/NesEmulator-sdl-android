@@ -1179,6 +1179,15 @@ UpdateGamepad(void)
                     }
 				}
 				JS |= (1 << x) << (wg << 3);
+
+				if (g_keyState[SDL_GetScancodeFromKey(SDLK_UP)])
+					JS |= (1 << 4) << (wg << 3);
+				if (g_keyState[SDL_GetScancodeFromKey(SDLK_DOWN)])
+					JS |= (1 << 5) << (wg << 3);
+				if (g_keyState[SDL_GetScancodeFromKey(SDLK_LEFT)])
+					JS |= (1 << 6) << (wg << 3);
+				if (g_keyState[SDL_GetScancodeFromKey(SDLK_RIGHT)])
+					JS |= (1 << 7) << (wg << 3);
 			}
 		}
 

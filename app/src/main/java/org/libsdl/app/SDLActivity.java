@@ -280,9 +280,11 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_DPAD_UP);
+//                        onNativeKeyDown(273);//KeyEvent.KEYCODE_DPAD_UP);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_DPAD_UP);
+//                        onNativeKeyUp(273);//KeyEvent.KEYCODE_DPAD_UP);
                         break;
                 }
                 return true;
@@ -295,9 +297,11 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_DPAD_DOWN);
+//                        onNativeKeyDown(274);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_DPAD_DOWN);
+//                        onNativeKeyUp(274);
                         break;
                 }
                 return true;
@@ -310,9 +314,11 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_DPAD_LEFT);
+//                        onNativeKeyDown(105);//276);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_DPAD_LEFT);
+//                        onNativeKeyUp(105);//276);
                         break;
                 }
                 return true;
@@ -325,9 +331,11 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_DPAD_RIGHT);
+//                        onNativeKeyDown(106);//275);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_DPAD_RIGHT);
+//                        onNativeKeyUp(106);//275);
                         break;
                 }
                 return true;
