@@ -38,6 +38,7 @@ import android.content.pm.ApplicationInfo;
 */
 public class SDLActivity extends Activity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "SDL";
+    private static String sGameName = "魂斗罗1中文无限命.nes";
 
     public static boolean mIsResumedCalled, mHasFocus;
     public static final boolean mHasMultiWindow = (Build.VERSION.SDK_INT >= 24);
@@ -164,7 +165,11 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
      * @return arguments for the native application.
      */
     protected String[] getArguments() {
-        return new String[0];
+       String[] argS = new String[1];
+       String gamePath = this.getApplicationContext().getFilesDir()
+                .getAbsolutePath() + "/" + sGameName; // data/data目录
+        argS[0] = gamePath;
+        return argS;
     }
 
     public static void initialize() {
@@ -341,6 +346,22 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             }
         });
 
+        Button buttonReset = controlPad.findViewById(R.id.reset);
+        buttonReset.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onNativeKeyDown(KeyEvent.KEYCODE_F11);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        onNativeKeyUp(KeyEvent.KEYCODE_F11);
+                        break;
+                }
+                return true;
+            }
+        });
+
         Button buttonS = controlPad.findViewById(R.id.buttons);
         buttonS.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -421,16 +442,15 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     }
 
     void copyGameToDataFiles() {
-        String gameName = "冒险岛4.nes";
         InputStream in = null;
         FileOutputStream out = null;
         String path = this.getApplicationContext().getFilesDir()
-                .getAbsolutePath() + "/" + gameName; // data/data目录
+                .getAbsolutePath() + "/" + sGameName; // data/data目录
         File file = new File(path);
         if(!file.exists()) {
             try
             {
-                in = this.getAssets().open(gameName); // 从assets目录下复制
+                in = this.getAssets().open(sGameName); // 从assets目录下复制
                 out = new FileOutputStream(file);
                 int length = -1;
                 byte[] buf = new byte[1024];

@@ -545,7 +545,9 @@ int main(int argc, char *argv[]) {
 	UpdateEMUCore(g_config);
 	setHotKeys();
 
-	error = LoadGame("/data/data/org.libsdl.app/files/冒险岛4.nes");
+	int romIndex = g_config->parse(argc, argv);
+	error = LoadGame(argv[romIndex]);
+//	error = LoadGame("/data/data/org.libsdl.app/files/魂斗罗1中文无限命.nes");
 	if(error != 1) {
 		SDL_Log("LoadGame error:%d\n", error);
 		DriverKill();

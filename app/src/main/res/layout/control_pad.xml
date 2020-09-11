@@ -43,6 +43,16 @@
             android:background="@drawable/right" />
     </RelativeLayout>
 
+    <Button
+        android:id="@+id/reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/reset"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="74dp"
+        android:layout_marginTop="10dp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
