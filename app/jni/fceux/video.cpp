@@ -743,8 +743,10 @@ void ShowFPS(void)
 	int booplimit = PAL?50:60;
 	boop[boopcount] = FCEUD_GetTime();
 
-	sprintf(fpsmsg, "%.1f", (double)booplimit / ((double)da / FCEUD_GetTimeFreq()));
-	DrawTextTrans(XBuf + ((256 - ClipSidesOffset) - 40) + (FSettings.FirstSLine + 4) * 256, 256, (uint8*)fpsmsg, 0xA0);
+//	sprintf(fpsmsg, "%.1f", (double)booplimit / ((double)da / FCEUD_GetTimeFreq()));
+//	DrawTextTrans(XBuf + ((256 - ClipSidesOffset) - 40) + (FSettings.FirstSLine + 4) * 256, 256, (uint8*)fpsmsg, 0xA0);
+	sprintf(fpsmsg, "fps:%.1f", (double)booplimit / ((double)da / FCEUD_GetTimeFreq()));
+	DrawTextTrans(XBuf + ((256 - ClipSidesOffset) - 80) + (FSettings.FirstSLine + 4) * 256, 256, (uint8*)fpsmsg, 0xA0);
 	// It's not averaging FPS over exactly 1 second, but it's close enough.
 	boopcount = (boopcount + 1) % booplimit;
 }
