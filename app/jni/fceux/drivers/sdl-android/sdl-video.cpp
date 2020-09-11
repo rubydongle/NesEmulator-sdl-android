@@ -40,16 +40,13 @@
 #include "../videolog/nesvideos-piece.h"
 #endif
 
-#ifdef _GTK
-#include "gui.h"
-#endif
-#ifdef GDK_WINDOWING_X11
-#include <gdk/gdkx.h>
-#endif
-
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+
+// NES resolution = 256x240
+const int NES_WIDTH = 256;
+const int NES_HEIGHT = 240;
 
 // GLOBALS
 extern Config *g_config;
@@ -167,12 +164,32 @@ int InitVideo(FCEUGI *gi)
 	s_window = SDL_CreateWindow("fceux game window" , SDL_WINDOWPOS_CENTERED,
 							  SDL_WINDOWPOS_CENTERED, 0, 0, SDL_WINDOW_SHOWN);
 	// 创建一个渲染器
-	s_renderer = SDL_CreateRenderer(s_window, -1, 0);
+//	s_renderer = SDL_CreateRenderer(s_window, -1, 0);
+	uint32_t baseFlags = 0;//vsyncEnabled ? SDL_RENDERER_PRESENTVSYNC : 0;
+	s_renderer = SDL_CreateRenderer(s_window, -1, baseFlags | SDL_RENDERER_ACCELERATED);
+	if (s_renderer == NULL)
+	{
+		printf("[SDL] Failed to create accelerated renderer.\n");
+		printf("[SDL] Attempting to create software renderer...\n");
+		s_renderer = SDL_CreateRenderer(s_window, -1, baseFlags | SDL_RENDERER_SOFTWARE);
+
+		if (s_renderer == NULL)
+		{
+			printf("[SDL] Failed to create software renderer.\n");
+			return -1;
+		}
+	}
+	int sdlRendW, sdlRendH;
+	SDL_GetRendererOutputSize( s_renderer, &sdlRendW, &sdlRendH );
+	SDL_Log("[SDL] Renderer Output Size: %i x %i \n", sdlRendW, sdlRendH );
+
 	int xres, yres;
 	SDL_GetWindowSize(s_window, &xres, &yres);
+
 	s_texture = SDL_CreateTexture(s_renderer,
 								   SDL_PIXELFORMAT_ARGB8888,
 								   SDL_TEXTUREACCESS_STREAMING,
+//								   NES_WIDTH, NES_HEIGHT);
 								   xres, yres);
 //	SDL_SetRenderDrawColor(s_renderer, 255, 0, 0, 255);
 //	SDL_RenderClear(s_renderer);
