@@ -587,8 +587,8 @@ uint64
 FCEUD_GetTimeFreq(void)
 {
 	// SDL_GetTicks() is in milliseconds
-	//return 1000;
-	return SDL_GetTicks();
+	return 1000;
+//	return SDL_GetTicks();
 }
 
 void FCEUD_Message(const char *text)
