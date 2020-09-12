@@ -800,9 +800,21 @@ BlitScreen(uint8 *XBuf)
 		SDL_UnlockSurface(TmpScreen);
 	}
 
+	SDL_Rect sdlRect;
+	int scale = 0;
+	if (!scale) {
+		int xres, yres;
+		SDL_GetWindowSize(s_window, &xres, &yres);
+		double scale = s_exs > s_eys ? s_eys : s_exs;
+		sdlRect.x = (xres - (NES_WIDTH *scale)) / 2;
+		sdlRect.y = 0;
+		sdlRect.w = NES_WIDTH * scale;
+		sdlRect.h = s_tlines * scale;
+	}
+
 	SDL_UpdateTexture(s_texture, NULL, TmpScreen->pixels, TmpScreen->pitch);
 	SDL_RenderClear(s_renderer);
-	SDL_RenderCopy(s_renderer, s_texture, NULL, NULL);
+	SDL_RenderCopy(s_renderer, s_texture, NULL, &sdlRect);
 	SDL_RenderPresent(s_renderer);
 }
 
