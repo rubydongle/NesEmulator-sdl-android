@@ -808,11 +808,13 @@ BlitScreen(uint8 *XBuf)
 	if (!scale) {
 		int xres, yres;
 		SDL_GetWindowSize(s_window, &xres, &yres);
-		double scale = s_exs > s_eys ? s_eys : s_exs;
+		//double scale = xres/NES_WIDTH > yres / NES_HEIGHT ? yres / NES_HEIGHT : yres / NES_WIDTH;//s_exs < s_eys ? s_exs : s_eys;
+		double scale = s_exs < s_eys ? s_exs : s_eys;
 		sdlRect.x = (xres - (NES_WIDTH *scale)) / 2;
 		sdlRect.y = 0;
 		sdlRect.w = NES_WIDTH * scale;
-		sdlRect.h = s_tlines * scale;
+//		sdlRect.h = s_tlines * scale;
+		sdlRect.h = NES_HEIGHT * scale;
 	}
 
 	SDL_UpdateTexture(s_texture, NULL, TmpScreen->pixels, TmpScreen->pitch);
