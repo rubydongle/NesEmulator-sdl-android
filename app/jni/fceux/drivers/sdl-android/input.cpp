@@ -36,14 +36,6 @@
 #include "../../fceulua.h"
 #endif
 
-#ifdef _GTK
-#include "gui.h"
-#ifdef SDL_VIDEO_DRIVER_X11
-#include <gdk/gdkx.h>
-#endif
-#endif
-
-
 #include <cstring>
 #include <cstdio>
 
@@ -51,7 +43,6 @@
 int NoWaiting = 1;
 extern Config *g_config;
 extern bool bindSavestate, frameAdvanceLagSkip, lagCounterDisplay;
-
 
 /* UsrInputType[] is user-specified.  CurInputType[] is current
         (game loading can override user settings)
@@ -196,30 +187,12 @@ void
 TogglePause ()
 {
 	FCEUI_ToggleEmulationPause ();
-
-	int no_cursor;
-	g_config->getOption("SDL.NoFullscreenCursor", &no_cursor);
-	int fullscreen;
-	g_config->getOption ("SDL.Fullscreen", &fullscreen);
-
-	// Don't touch grab when in windowed mode
-	if(fullscreen == 0)
-		return;
-
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	// TODO - SDL2
-#else
-	if (FCEUI_EmulationPaused () == 0)
+	if (FCEUI_EmulationPaused ())
 	{
-		SDL_WM_GrabInput (SDL_GRAB_ON);
-		if(no_cursor)
-			SDL_ShowCursor (0);
 	}
 	else {
-		SDL_WM_GrabInput (SDL_GRAB_OFF);
-		SDL_ShowCursor (1);
 	}
-#endif
+
 	return;
 }
 
@@ -233,84 +206,6 @@ std::string GetFilename (const char *title, bool save, const char *filter)
 		FCEUI_ToggleEmulationPause ();
 	std::string fname = "";
 
-#ifdef WIN32
-	OPENFILENAME ofn;		// common dialog box structure
-	char szFile[260];		// buffer for file name
-	HWND hwnd;			// owner window
-	HANDLE hf;			// file handle
-
-	// Initialize OPENFILENAME
-	memset (&ofn, 0, sizeof (ofn));
-	ofn.lStructSize = sizeof (ofn);
-	ofn.hwndOwner = hwnd;
-	ofn.lpstrFile = szFile;
-	// Set lpstrFile[0] to '\0' so that GetOpenFileName does not 
-	// use the contents of szFile to initialize itself.
-	ofn.lpstrFile[0] = '\0';
-	ofn.nMaxFile = sizeof (szFile);
-	ofn.lpstrFilter = "All\0*.*\0";
-	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
-	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-	// Display the Open dialog box. 
-	fname = GetOpenFileName (&ofn);
-
-#endif
-#ifdef _GTK
-	int fullscreen = 0;
-	g_config->getOption ("SDL.Fullscreen", &fullscreen);
-	if (fullscreen)
-		ToggleFS ();
-
-	GtkWidget *fileChooser;
-
-	GtkFileFilter *filterX;
-	GtkFileFilter *filterAll;
-
-	filterX = gtk_file_filter_new ();
-	gtk_file_filter_add_pattern (filterX, filter);
-	gtk_file_filter_set_name (filterX, filter);
-
-
-	filterAll = gtk_file_filter_new ();
-	gtk_file_filter_add_pattern (filterAll, "*");
-	gtk_file_filter_set_name (filterAll, "All Files");
-
-	if (save)
-		fileChooser = gtk_file_chooser_dialog_new ("Save as", NULL,
-							GTK_FILE_CHOOSER_ACTION_SAVE,
-							GTK_STOCK_CANCEL,
-							GTK_RESPONSE_CANCEL,
-							GTK_STOCK_SAVE_AS,
-							GTK_RESPONSE_ACCEPT, NULL);
-	else
-		fileChooser = gtk_file_chooser_dialog_new ("Open", NULL,
-							GTK_FILE_CHOOSER_ACTION_OPEN,
-							GTK_STOCK_CANCEL,
-							GTK_RESPONSE_CANCEL,
-							GTK_STOCK_OPEN,
-							GTK_RESPONSE_ACCEPT, NULL);
-
-	// TODO: make file filters case insensitive     
-	//gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterX);
-	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (fileChooser), filterAll);
-	int response = gtk_dialog_run (GTK_DIALOG (fileChooser));
-
-	// flush gtk events
-	while (gtk_events_pending ())
-		gtk_main_iteration_do (TRUE);
-
-	if (response == GTK_RESPONSE_ACCEPT)
-		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
-
-	gtk_widget_destroy (fileChooser);
-
-	while (gtk_events_pending ())
-		gtk_main_iteration_do (TRUE);
-#endif
 	FCEUI_ToggleEmulationPause ();
 	return fname;
 }
@@ -320,71 +215,6 @@ std::string GetFilename (const char *title, bool save, const char *filter)
  */
 std::string GetUserText (const char *title)
 {
-#ifdef _GTK
-/*	prg318 - 10/13/11 - this is broken in recent build and causes 
- *	segfaults/very weird behavior i'd rather remove it for now than it cause 
- *	accidental segfaults
- *	TODO fix it
-*/
-#if 0
-
-	GtkWidget* d;
-	GtkWidget* entry;
-	
-	d = gtk_dialog_new_with_buttons(title, NULL, GTK_DIALOG_MODAL, GTK_STOCK_OK, GTK_RESPONSE_OK); 
-	
-	entry = gtk_entry_new();
-
-	GtkWidget* vbox = gtk_dialog_get_content_area(GTK_DIALOG(d));
-	
-	gtk_container_add(GTK_CONTAINER(vbox), entry);
-	
-	gtk_widget_show_all(d);
-	
-	gtk_dialog_run(GTK_DIALOG(d));
-	
-	// flush gtk events
-	while(gtk_events_pending())
-			gtk_main_iteration_do(TRUE);
-
-		std::string input = gtk_entry_get_text(GTK_ENTRY(entry));
-	
-		if (FCEUI_EmulationPaused() == 0)
-        	FCEUI_ToggleEmulationPause(); // pause emulation
-	
-		int fullscreen = 0; 
-		g_config->getOption("SDL.Fullscreen", &fullscreen);
-		if(fullscreen)
-			ToggleFS(); // disable fullscreen emulation
-	
-	FILE *fpipe;
-	std::string command = "zenity --entry --title=\"";
-	command.append(title);
-	command.append("\" --text=\"");
-	command.append(title);
-	command.append(":\"");
-	
-	if (!(fpipe = (FILE*)popen(command.c_str(),"r"))) // If fpipe is NULL
-		FCEUD_PrintError("Pipe error on opening zenity");
-	int c;
-	std::string input;
-	while((c = fgetc(fpipe)))
-	{
-		if (c == EOF || c == '\n')
-			break;
-		input += c;
-	}
-    	pclose(fpipe);
-     gtk_widget_destroy(d);
-
-
-     while(gtk_events_pending())
-     gtk_main_iteration_do(TRUE);
-
-     FCEUI_ToggleEmulationPause(); // unpause emulation
-     return input;
-#endif // #if 0
-#endif
   return "";
 }
 
@@ -450,11 +280,7 @@ static void KeyboardCommands ()
 
 	char *movie_fname = "";
 	// get the keyboard input
-#if SDL_VERSION_ATLEAST(1, 3, 0)
 	g_keyState = (Uint8*)SDL_GetKeyboardState (NULL);
-#else
-	g_keyState = SDL_GetKeyState (NULL);
-#endif
 
 	// check if the family keyboard is enabled
 	if (CurInputType[2] == SIFC_FKB)
@@ -742,9 +568,6 @@ static void KeyboardCommands ()
 	for (int i = 0; i < 10; i++)
 		if (_keyonly (Hotkeys[HK_SELECT_STATE_0 + i]))
 		{
-#ifdef _GTK
-			gtk_radio_action_set_current_value (stateSlot, i);
-#endif
 			FCEUI_SelectState (i, 1);
 		}
 
@@ -901,21 +724,6 @@ GetMouseData (uint32 (&d)[3])
 
 	// retrieve the state of the mouse from SDL
 	t = SDL_GetMouseState (&x, &y);
-#ifdef _GTK
-	if (noGui == 0)
-	{
-		// don't ask for gtk mouse info when in fullscreen
-		// we can use sdl directly in fullscreen
-		int fullscreen = 0;
-		g_config->getOption ("SDL.Fullscreen", &fullscreen);
-		if (fullscreen == 0)
-		{
-			x = GtkMouseData[0];
-			y = GtkMouseData[1];
-			t = GtkMouseData[2];
-		}
-	}
-#endif
 
 	d[2] = 0;
 	if (t & SDL_BUTTON (1))
@@ -981,21 +789,11 @@ int ButtonConfigBegin ()
 {
 //dont shut down video subsystem if we are using gtk to prevent the sdl window from becoming detached to GTK window
 // prg318 - 10-2-2011
-#ifdef _GTK
-	int noGui;
-	g_config->getOption ("SDL.NoGUI", &noGui);
-	if (noGui == 1)
-	{
-		SDL_QuitSubSystem (SDL_INIT_VIDEO);
-		bcpv = KillVideo ();
-	}
-#else
 	// XXX soules - why are we doing this right before KillVideo()?
 	SDL_QuitSubSystem (SDL_INIT_VIDEO);
 
 	// shut down the video and joystick subsystems
 	bcpv = KillVideo ();
-#endif
 	SDL_Surface *screen;
 
 	bcpj = KillJoysticks ();
@@ -1009,23 +807,6 @@ int ButtonConfigBegin ()
 		}
 		else
 		{
-#if defined(_GTK) && defined(SDL_VIDEO_DRIVER_X11)
-			if (noGui == 0)
-			{
-				while (gtk_events_pending ())
-					gtk_main_iteration_do (FALSE);
-
-				char SDL_windowhack[128];
-				if (gtk_widget_get_window (evbox))
-					sprintf (SDL_windowhack, "SDL_WINDOWID=%u",
-					(unsigned int) GDK_WINDOW_XID (gtk_widget_get_window (evbox)));
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-					// TODO - SDL2
-#else
-					SDL_putenv (SDL_windowhack);
-#endif
-			}
-#endif
 			if (SDL_InitSubSystem (SDL_INIT_VIDEO) == -1)
 			{
 				FCEUD_Message (SDL_GetError ());
@@ -1718,10 +1499,6 @@ int DWaitButton (const uint8 * text, ButtConfig * bc, int wb)
 	while (1)
 	{
 		int done = 0;
-#ifdef _GTK
-		while (gtk_events_pending ())
-			gtk_main_iteration_do (FALSE);
-#endif
 		while (SDL_PollEvent (&event))
 		{
 			done++;
@@ -1958,13 +1735,6 @@ void ConfigDevice (int which, int arg)
  */
 void InputCfg (const std::string & text)
 {
-#ifdef _GTK
-	// enable noGui to prevent the gtk x11 hack from executing
-	noGui = 1;
-	// this is only called at the begininng of execution; make sure the video subsystem is initialized
-	InitVideo (GameInfo);
-#endif
-
 	if (noGui)
 	{
 		if (text.find ("gamepad") != std::string::npos)
@@ -2009,8 +1779,7 @@ void InputCfg (const std::string & text)
  * configuration management.  Will probably want to change this in the
  * future - soules.
  */
-	void
-UpdateInput (Config * config)
+void UpdateInput (Config * config)
 {
 	char buf[64];
 	std::string device, prefix;
