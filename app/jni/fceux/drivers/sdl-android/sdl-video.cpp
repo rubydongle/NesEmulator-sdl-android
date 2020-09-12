@@ -163,6 +163,9 @@ int InitVideo(FCEUGI *gi)
 	// 创建一个窗口
 	s_window = SDL_CreateWindow("fceux game window" , SDL_WINDOWPOS_CENTERED,
 							  SDL_WINDOWPOS_CENTERED, 0, 0, SDL_WINDOW_SHOWN);
+
+    FCEUI_SetShowFPS(1);
+
 	// 创建一个渲染器
 //	s_renderer = SDL_CreateRenderer(s_window, -1, 0);
 	uint32_t baseFlags = 0;//vsyncEnabled ? SDL_RENDERER_PRESENTVSYNC : 0;
