@@ -146,22 +146,23 @@ static int
 _keyonly (int a)
 {
 	// check for valid key
-	if (a > SDLK_LAST + 1 || a < 0)
+	int scanCode = SDL_GetScancodeFromKey(a);
+	if (scanCode > SDLK_LAST + 1 || scanCode < 0) {
 		return 0;
-#if SDL_VERSION_ATLEAST(2, 0, 0)
+	}
 	if (g_keyState[SDL_GetScancodeFromKey (a)])
-#else
-	if (g_keyState[a])
-#endif
 	{
-		if (!keyonce[a])
+		if (a == Hotkeys[HK_RESET]) {
+			SDL_Log("KeyOnly F11 is clicked");
+		}
+		if (!keyonce[scanCode])
 		{
-			keyonce[a] = 1;
+			keyonce[scanCode] = 1;
 			return 1;
 		}
 	} 
 	else {
-		keyonce[a] = 0;
+		keyonce[scanCode] = 0;
 	}
 	return 0;
 }
