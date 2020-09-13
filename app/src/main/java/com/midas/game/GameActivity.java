@@ -7,7 +7,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
-import org.libsdl.app.R;
 import org.libsdl.app.SDLActivity;
 
 import java.io.File;
