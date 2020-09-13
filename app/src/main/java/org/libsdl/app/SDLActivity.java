@@ -567,6 +567,31 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 return true;
             }
         });
+        Button buttonBA = controlPad.findViewById(R.id.buttonba);
+        buttonBA.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onNativeKeyDown(KeyEvent.KEYCODE_D);
+                        onNativeKeyDown(KeyEvent.KEYCODE_F);
+                        buttonD.setScaleX((float)0.9);
+                        buttonD.setScaleY((float)0.9);
+                        buttonF.setScaleX((float)0.9);
+                        buttonF.setScaleY((float)0.9);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        onNativeKeyUp(KeyEvent.KEYCODE_D);
+                        onNativeKeyUp(KeyEvent.KEYCODE_F);
+                        buttonD.setScaleX(1);
+                        buttonD.setScaleY(1);
+                        buttonF.setScaleX(1);
+                        buttonF.setScaleY(1);
+                        break;
+                }
+                return true;
+            }
+        });
         mLayout.addView(controlPad);
         setContentView(mLayout);
 
