@@ -284,10 +284,14 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_DPAD_UP);
+                        view.setScaleX((float)0.9);
+                        view.setScaleY((float)0.9);
 //                        onNativeKeyDown(273);//KeyEvent.KEYCODE_DPAD_UP);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_DPAD_UP);
+                        view.setScaleX(1);
+                        view.setScaleY(1);
 //                        onNativeKeyUp(273);//KeyEvent.KEYCODE_DPAD_UP);
                         break;
                 }
@@ -301,10 +305,14 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_DPAD_DOWN);
+                        view.setScaleX((float)0.9);
+                        view.setScaleY((float)0.9);
 //                        onNativeKeyDown(274);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_DPAD_DOWN);
+                        view.setScaleX(1);
+                        view.setScaleY(1);
 //                        onNativeKeyUp(274);
                         break;
                 }
@@ -318,10 +326,14 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_DPAD_LEFT);
+                        view.setScaleX((float)0.9);
+                        view.setScaleY((float)0.9);
 //                        onNativeKeyDown(105);//276);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_DPAD_LEFT);
+                        view.setScaleX(1);
+                        view.setScaleY(1);
 //                        onNativeKeyUp(105);//276);
                         break;
                 }
@@ -335,10 +347,14 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_DPAD_RIGHT);
+                        view.setScaleX((float)0.9);
+                        view.setScaleY((float)0.9);
 //                        onNativeKeyDown(106);//275);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_DPAD_RIGHT);
+                        view.setScaleX(1);
+                        view.setScaleY(1);
 //                        onNativeKeyUp(106);//275);
                         break;
                 }
@@ -346,6 +362,114 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             }
         });
 
+        Button buttonUpLeft = controlPad.findViewById(R.id.button_upleft);
+        buttonUpLeft.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_UP);
+                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_LEFT);
+                        buttonUp.setScaleX((float)0.9);
+                        buttonUp.setScaleY((float)0.9);
+                        buttonLeft.setScaleX((float)0.9);
+                        buttonLeft.setScaleY((float)0.9);
+//                        onNativeKeyDown(106);//275);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_UP);
+                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_LEFT);
+                        buttonUp.setScaleX(1);
+                        buttonUp.setScaleY(1);
+                        buttonLeft.setScaleX(1);
+                        buttonLeft.setScaleY(1);
+//                        onNativeKeyUp(106);//275);
+                        break;
+                }
+                return true;
+            }
+        });
+        Button buttonUpRight = controlPad.findViewById(R.id.button_upright);
+        buttonUpRight.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_UP);
+                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_RIGHT);
+                        buttonUp.setScaleX((float)0.9);
+                        buttonUp.setScaleY((float)0.9);
+                        buttonRight.setScaleX((float)0.9);
+                        buttonRight.setScaleY((float)0.9);
+//                        onNativeKeyDown(106);//275);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_UP);
+                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_RIGHT);
+                        buttonUp.setScaleX(1);
+                        buttonUp.setScaleY(1);
+                        buttonRight.setScaleX(1);
+                        buttonRight.setScaleY(1);
+//                        onNativeKeyUp(106);//275);
+                        break;
+                }
+                return true;
+            }
+        });
+        Button buttonDownRight = controlPad.findViewById(R.id.button_downright);
+        buttonDownRight.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_DOWN);
+                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_RIGHT);
+                        buttonDown.setScaleX((float)0.9);
+                        buttonDown.setScaleY((float)0.9);
+                        buttonRight.setScaleX((float)0.9);
+                        buttonRight.setScaleY((float)0.9);
+//                        onNativeKeyDown(106);//275);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_DOWN);
+                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_RIGHT);
+                        buttonDown.setScaleX(1);
+                        buttonDown.setScaleY(1);
+                        buttonRight.setScaleX(1);
+                        buttonRight.setScaleY(1);
+//                        onNativeKeyUp(106);//275);
+                        break;
+                }
+                return true;
+            }
+        });
+        Button buttonDownLeft = controlPad.findViewById(R.id.button_downleft);
+        buttonDownLeft.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_DOWN);
+                        onNativeKeyDown(KeyEvent.KEYCODE_DPAD_LEFT);
+                        buttonDown.setScaleX((float)0.9);
+                        buttonDown.setScaleY((float)0.9);
+                        buttonLeft.setScaleX((float)0.9);
+                        buttonLeft.setScaleY((float)0.9);
+//                        onNativeKeyDown(106);//275);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_DOWN);
+                        onNativeKeyUp(KeyEvent.KEYCODE_DPAD_LEFT);
+                        buttonDown.setScaleX(1);
+                        buttonDown.setScaleY(1);
+                        buttonLeft.setScaleX(1);
+                        buttonLeft.setScaleY(1);
+//                        onNativeKeyUp(106);//275);
+                        break;
+                }
+                return true;
+            }
+        });
         Button buttonReset = controlPad.findViewById(R.id.reset);
         buttonReset.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -353,9 +477,13 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_F11);
+                        view.setScaleX((float)0.9);
+                        view.setScaleY((float)0.9);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_F11);
+                        view.setScaleX(1);
+                        view.setScaleY(1);
                         break;
                 }
                 return true;
@@ -369,9 +497,13 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_S);
+                        view.setScaleX((float)0.9);
+                        view.setScaleY((float)0.9);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_S);
+                        view.setScaleX(1);
+                        view.setScaleY(1);
                         break;
                 }
                 return true;
@@ -384,9 +516,13 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_ENTER);
+                        view.setScaleX((float)0.9);
+                        view.setScaleY((float)0.9);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_ENTER);
+                        view.setScaleX(1);
+                        view.setScaleY(1);
                         break;
                 }
                 return true;
@@ -400,9 +536,13 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_D);
+                        view.setScaleX((float)0.9);
+                        view.setScaleY((float)0.9);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_D);
+                        view.setScaleX(1);
+                        view.setScaleY(1);
                         break;
                 }
                 return true;
@@ -415,9 +555,13 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         onNativeKeyDown(KeyEvent.KEYCODE_F);
+                        view.setScaleX((float)0.9);
+                        view.setScaleY((float)0.9);
                         break;
                     case MotionEvent.ACTION_UP:
                         onNativeKeyUp(KeyEvent.KEYCODE_F);
+                        view.setScaleX(1);
+                        view.setScaleY(1);
                         break;
                 }
                 return true;

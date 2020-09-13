@@ -3,8 +3,8 @@
     android:layout_width="match_parent" android:layout_height="match_parent" >
 
     <RelativeLayout
-        android:layout_width="216dp"
-        android:layout_height="216dp"
+        android:layout_width="186dp"
+        android:layout_height="186dp"
         android:layout_marginLeft="10dp"
         android:layout_marginBottom="10dp"
         android:layout_alignParentBottom="true"
@@ -41,6 +41,38 @@
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             android:background="@drawable/right" />
+        <Button
+            android:id="@+id/button_upleft"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_alignBottom="@+id/buttonup"
+            android:layout_alignRight="@+id/buttonleft"
+            android:layout_marginRight="0dp"
+            android:background="#0000" />
+        <Button
+            android:id="@+id/button_upright"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_alignBottom="@+id/buttonup"
+            android:layout_alignLeft="@+id/buttonright"
+            android:layout_marginRight="0dp"
+            android:background="#0000" />
+        <Button
+            android:id="@+id/button_downright"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_alignTop="@+id/buttondown"
+            android:layout_alignLeft="@+id/buttonright"
+            android:layout_marginRight="0dp"
+            android:background="#0000" />
+        <Button
+            android:id="@+id/button_downleft"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_alignTop="@+id/buttondown"
+            android:layout_alignRight="@+id/buttonleft"
+            android:layout_marginRight="0dp"
+            android:background="#0000" />
     </RelativeLayout>
 
     <Button
@@ -84,7 +116,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginRight="80dp"
+        android:layout_marginRight="40dp"
         android:orientation="horizontal">
 
         <Button

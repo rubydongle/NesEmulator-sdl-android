@@ -6,3 +6,4 @@ app/.externalNativeBuild/
 *swo
 .cxx/
 *gradle-wrapper.properties
+*local.properties
