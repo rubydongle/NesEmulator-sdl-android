@@ -1,6 +1,3 @@
-/// \file
-/// \brief Handles emulation speed throttling using the SDL timing functions.
-
 #include "main.h"
 #include "throttle.h"
 

@@ -24,18 +24,27 @@ int Emulator::driverInitialize(FCEUGI *gi)
 {
     if(InitVideo(gi) < 0) return 0;
     driverInited|=4;
+    videoInited = 1;
 
-    if(InitSound())
+    if(InitSound()) {
         driverInited|=1;
+        audioInited = 1;
 
-    if(InitJoysticks())
+    }
+
+    if(InitJoysticks()) {
         driverInited|=2;
+        joyStickInited = 1;
+    }
 
     int fourscore=0;
     g_config->getOption("SDL.FourScore", &fourscore);
     eoptions &= ~EO_FOURSCORE;
-    if(fourscore)
+    eOptions &= ~EO_FOURSCORE;
+    if(fourscore) {
         eoptions |= EO_FOURSCORE;
+        eOptions |= EO_FOURSCORE;
+    }
 
     InitInputInterface();
     return 1;
@@ -46,13 +55,32 @@ void Emulator::driverKill()
 //    if (!noconfig)
 //        g_config->save();
 
-    if(driverInited&2)
+//    if(driverInited&2)
+//        KillJoysticks();
+//    if(driverInited&4)
+//        KillVideo();
+//    if(driverInited&1)
+//        KillSound();
+
+    if(joyStickInited) {
         KillJoysticks();
-    if(driverInited&4)
+        joyStickInited = 0;
+    }
+
+    if(videoInited) {
         KillVideo();
-    if(driverInited&1)
+        videoInited = 0;
+    }
+
+    if(audioInited) {
         KillSound();
+        audioInited = 0;
+    }
     driverInited=0;
+}
+
+void Emulator::setBaseDirectory(const char *path) {
+    FCEUI_SetBaseDirectory(path);
 }
 
 int Emulator::loadGame(const char *path)
@@ -144,54 +172,6 @@ int Emulator::loadGame(int argc, char** argv)
     return 1;
 }
 
-//int XloadGame(int argc, char** argv)//const char *path)
-//{
-//    int romIndex = gConfig->parse(argc, argv);
-//    const char* path = argv[romIndex];
-//
-//    if (gameInfo){
-//        closeGame();
-//    }
-//
-//    gameInfo = FCEUI_LoadGame(path, 0);
-//    if(!gameInfo) {
-//        return 0;
-//    }
-//
-////    int state_to_load;
-////    g_config->getOption("SDL.AutoLoadState", &state_to_load);
-////    if (state_to_load >= 0 && state_to_load < 10){
-////        FCEUI_SelectState(state_to_load, 0);
-////        FCEUI_LoadState(NULL, false);
-////    }
-//
-//    ParseGIInput(GameInfo);//gameInfo);
-//    RefreshThrottleFPS();
-//
-//    if(!driverInitialize()) {
-//        return(0);
-//    }
-//
-//    // set pal/ntsc
-////    FCEUI_SetVidSystem(isPal ? 1 : 0);
-//    int id;
-//    gConfig->getOption("SDL.PAL", &id);
-//    FCEUI_SetRegion(id);
-//
-//    gConfig->getOption("SDL.SwapDuty", &id);
-//    swapDuty = id;
-//
-////    std::string filename;
-////    g_config->getOption("SDL.Sound.RecordFile", &filename);
-////    if(filename.size()) {
-////        if(!FCEUI_BeginWaveRecord(filename.c_str())) {
-////            g_config->setOption("SDL.Sound.RecordFile", "");
-////        }
-////    }
-//
-////    FCEUD_NetworkConnect();
-//    return 1;
-//}
 void Emulator::doFun()//int frameskip, int periodic_saves)
 {
     SDL_Log("%s", __FUNCTION__);

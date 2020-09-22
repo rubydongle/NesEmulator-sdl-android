@@ -14,6 +14,7 @@ public:
     void doFun();
     int driverInitialize(FCEUGI *gi);
     void driverKill();
+    void setBaseDirectory(const char* path);
 
 //    FCEUGI* getGameInfo() {
 //        return gameInfo;
@@ -34,6 +35,7 @@ private:
     int videoInited = 0;
     int audioInited = 0;
     int joyStickInited = 0;
+    int eOptions;
 
 };
 

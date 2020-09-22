@@ -57,20 +57,11 @@ CreateDirs(const std::string &dir)
 	std::string subdir;
 	int x;
 
-#if defined(WIN32) || defined(NEED_MINGW_HACKS)
-	mkdir(dir.c_str());
-	chmod(dir.c_str(), 755);
-	for(x = 0; x < 6; x++) {
-		subdir = dir + PSS + subs[x];
-		mkdir(subdir.c_str());
-	}
-#else
 	mkdir(dir.c_str(), S_IRWXU);
 	for(x = 0; x < 6; x++) {
 		subdir = dir + PSS + subs[x];
 		mkdir(subdir.c_str(), S_IRWXU);
 	}
-#endif
 }
 
 /**
@@ -81,25 +72,12 @@ CreateDirs(const std::string &dir)
 static void
 GetBaseDirectory(std::string &dir)
 {
-	char *home = getenv("HOME");
-	if(home) {
-		dir = std::string(home) + "/.fceux";
-	} else {
-#ifdef WIN32
-		home = new char[MAX_PATH + 1];
-		GetModuleFileName(NULL, home, MAX_PATH + 1);
-
-		char *lastBS = strrchr(home,'\\');
-		if(lastBS) {
-			*lastBS = 0;
-		}
-
-		dir = std::string(home);
-		delete[] home;
-#else
-		dir = "";
-#endif
-	}
+	dir = FCEUI_GetBaseDirectory();//getenv("HOME");
+//	if(home) {
+//		dir = std::string(home) + "/.fceux";
+//	} else {
+//		dir = "";
+//	}
 }
 
 // returns a config structure with default options
@@ -233,17 +211,6 @@ Config* InitConfig() {
     //TODO implement this
     config->addOption("periodicsaves", "SDL.PeriodicSaves", 0);
 
-    
-    #ifdef _GTK
-	char* home_dir = getenv("HOME");
-	// prefixed with _ because they are internal (not cli options)
-	config->addOption("_lastopenfile", "SDL.LastOpenFile", home_dir);
-	config->addOption("_laststatefrom", "SDL.LastLoadStateFrom", home_dir);
-	config->addOption("_lastopennsf", "SDL.LastOpenNSF", home_dir);
-	config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", home_dir);
-	config->addOption("_lastloadlua", "SDL.LastLoadLua", "");
-    #endif
-    
 	// fcm -> fm2 conversion
 	config->addOption("fcmconvert", "SDL.FCMConvert", "");
     
