@@ -1,32 +1,9 @@
-/* FCE Ultra - NES/Famicom Emulator
- *
- * Copyright notice for this file:
- *  Copyright (C) 2002 Xodnizel
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
 #include "main.h"
 #include "dface.h"
 #include "input.h"
 #include "config.h"
-
-
 #include "sdl-video.h"
 #include "sdl.h"
-
 #include "../common/cheat.h"
 #include "../../movie.h"
 #include "../../fceu.h"
@@ -542,17 +519,10 @@ static void KeyboardCommands ()
 	//}
 	if (_keyonly (Hotkeys[HK_QUIT]))
 	{
-		if (noGui == 1)
-		{
-			CloseGame ();
-		}
-		else
-		{
-			CloseGame();
-			FCEUI_Kill();
-			SDL_Quit();
-			exit(0);
-		}
+		CloseGame();
+		FCEUI_Kill();
+		SDL_Quit();
+		exit(0);
 	}
 	else
 #ifdef _S9XLUA_H
@@ -1735,42 +1705,36 @@ void ConfigDevice (int which, int arg)
  */
 void InputCfg (const std::string & text)
 {
-	if (noGui)
+	if (text.find ("gamepad") != std::string::npos)
 	{
-		if (text.find ("gamepad") != std::string::npos)
+		int device = (text[strlen ("gamepad")] - '1');
+		if (device < 0 || device > 3)
 		{
-			int device = (text[strlen ("gamepad")] - '1');
-			if (device < 0 || device > 3)
-			{
-				FCEUD_PrintError
+			FCEUD_PrintError
 					("Invalid gamepad device specified; must be one of gamepad1 through gamepad4");
-				exit (-1);
-			}
-			ConfigDevice (FCFGD_GAMEPAD, device);
+			exit (-1);
 		}
-		else if (text.find ("powerpad") != std::string::npos)
-		{
-			int device = (text[strlen ("powerpad")] - '1');
-			if (device < 0 || device > 1)
-			{
-				FCEUD_PrintError
-					("Invalid powerpad device specified; must be powerpad1 or powerpad2");
-				exit (-1);
-			}
-			ConfigDevice (FCFGD_POWERPAD, device);
-		}
-		else if (text.find ("hypershot") != std::string::npos)
-		{
-			ConfigDevice (FCFGD_HYPERSHOT, 0);
-		}
-		else if (text.find ("quizking") != std::string::npos)
-		{
-			ConfigDevice (FCFGD_QUIZKING, 0);
-		}
+		ConfigDevice (FCFGD_GAMEPAD, device);
 	}
-	else
-		printf ("Please run \"fceux --nogui\" before using --inputcfg\n");
-
+	else if (text.find ("powerpad") != std::string::npos)
+	{
+		int device = (text[strlen ("powerpad")] - '1');
+		if (device < 0 || device > 1)
+		{
+			FCEUD_PrintError
+					("Invalid powerpad device specified; must be powerpad1 or powerpad2");
+			exit (-1);
+		}
+		ConfigDevice (FCFGD_POWERPAD, device);
+	}
+	else if (text.find ("hypershot") != std::string::npos)
+	{
+		ConfigDevice (FCFGD_HYPERSHOT, 0);
+	}
+	else if (text.find ("quizking") != std::string::npos)
+	{
+		ConfigDevice (FCFGD_QUIZKING, 0);
+	}
 }
 
 

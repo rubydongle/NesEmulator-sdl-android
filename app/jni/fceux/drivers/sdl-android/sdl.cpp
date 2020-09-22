@@ -41,17 +41,12 @@
 
 
 extern double g_fpsScale;
-
 extern bool MaxSpeed;
 
 int isloaded;
-
 bool turbo = false;
-
 int closeFinishedMovie = 0;
-
 int eoptions=0;
-
 static int inited = 0;
 
 static void DriverKill(void);
@@ -61,121 +56,13 @@ int gametype = 0;
 #ifdef CREATE_AVI
 int mutecapture;
 #endif
-static int noconfig;
 
+static int noconfig;
 int pal_emulation;
 int dendy;
 bool swapDuty;
-
-// -Video Modes Tag- : See --special
-static const char *DriverUsage=
-"Option         Value   Description\n"
-"--pal          {0|1}   Use PAL timing.\n"
-"--newppu       {0|1}   Enable the new PPU core. (WARNING: May break savestates)\n"
-"--inputcfg     d       Configures input device d on startup.\n"
-"--input(1,2)   d       Set which input device to emulate for input 1 or 2.\n"
-"                         Devices:  gamepad zapper powerpad.0 powerpad.1\n"
-"                         arkanoid\n"
-"--input(3,4)   d       Set the famicom expansion device to emulate for\n"
-"                       input(3, 4)\n"
-"                          Devices: quizking hypershot mahjong toprider ftrainer\n"
-"                          familykeyboard oekakids arkanoid shadow bworld\n"
-"                          4player\n"
-"--gamegenie    {0|1}   Enable emulated Game Genie.\n"
-"--frameskip    x       Set # of frames to skip per emulated frame.\n"
-"--xres         x       Set horizontal resolution for full screen mode.\n"
-"--yres         x       Set vertical resolution for full screen mode.\n"
-"--autoscale    {0|1}   Enable autoscaling in fullscreen. \n"
-"--keepratio    {0|1}   Keep native NES aspect ratio when autoscaling. \n"
-"--(x/y)scale   x       Multiply width/height by x. \n"
-"                         (Real numbers >0 with OpenGL, otherwise integers >0).\n"
-"--(x/y)stretch {0|1}   Stretch to fill surface on x/y axis (OpenGL only).\n"
-"--bpp       {8|16|32}  Set bits per pixel.\n"
-"--opengl       {0|1}   Enable OpenGL support.\n"
-"--fullscreen   {0|1}   Enable full screen mode.\n"
-"--noframe      {0|1}   Hide title bar and window decorations.\n"
-"--special      {1-4}   Use special video scaling filters\n"
-"                         (1 = hq2x; 2 = Scale2x; 3 = NTSC 2x; 4 = hq3x;\n"
-"                         5 = Scale3x; 6 = Prescale2x; 7 = Prescale3x; 8=Precale4x; 9=PAL)\n"
-"--palette      f       Load custom global palette from file f.\n"
-"--sound        {0|1}   Enable sound.\n"
-"--soundrate    x       Set sound playback rate to x Hz.\n"
-"--soundq      {0|1|2}  Set sound quality. (0 = Low 1 = High 2 = Very High)\n"
-"--soundbufsize x       Set sound buffer size to x ms.\n"
-"--volume      {0-256}  Set volume to x.\n"
-"--soundrecord  f       Record sound to file f.\n"
-"--playmov      f       Play back a recorded FCM/FM2/FM3 movie from filename f.\n"
-"--pauseframe   x       Pause movie playback at frame x.\n"
-"--fcmconvert   f       Convert fcm movie file f to fm2.\n"
-"--ripsubs      f       Convert movie's subtitles to srt\n"
-"--subtitles    {0|1}   Enable subtitle display\n"
-"--fourscore    {0|1}   Enable fourscore emulation\n"
-"--no-config    {0|1}   Use default config file and do not save\n"
-"--net          s       Connect to server 's' for TCP/IP network play.\n"
-"--port         x       Use TCP/IP port x for network play.\n"
-"--user         x       Set the nickname to use in network play.\n"
-"--pass         x       Set password to use for connecting to the server.\n"
-"--netkey       s       Use string 's' to create a unique session for the\n"
-"                       game loaded.\n"
-"--players      x       Set the number of local players in a network play\n"
-"                       session.\n"
-"--rp2mic       {0|1}   Replace Port 2 Start with microphone (Famicom).\n"
-"--nogui                Don't load the GTK GUI\n"
-"--4buttonexit {0|1}    exit the emulator when A+B+Select+Start is pressed\n"
-"--loadstate {0-9|>9}   load from the given state when the game is loaded\n"
-"--savestate {0-9|>9}   save to the given state when the game is closed\n"
-"                         to not save/load automatically provide a number\n"
-"                         greater than 9\n"
-"--periodicsaves {0|1}  enable automatic periodic saving.  This will save to\n"
-"                         the state passed to --savestate\n";
-
-
-// these should be moved to the man file
-//--nospritelim  {0|1}   Disables the 8 sprites per scanline limitation.\n
-//--trianglevol {0-256}  Sets Triangle volume.\n
-//--square1vol  {0-256}  Sets Square 1 volume.\n
-//--square2vol  {0-256}  Sets Square 2 volume.\n
-//--noisevol	{0-256}  Sets Noise volume.\n
-//--pcmvol	  {0-256}  Sets PCM volume.\n
-//--lowpass	  {0|1}   Enables low-pass filter if x is nonzero.\n
-//--doublebuf	{0|1}   Enables SDL double-buffering if x is nonzero.\n
-//--slend	  {0-239}   Sets the last drawn emulated scanline.\n
-//--ntsccolor	{0|1}   Emulates an NTSC TV's colors.\n
-//--hue		   x	  Sets hue for NTSC color emulation.\n
-//--tint		  x	  Sets tint for NTSC color emulation.\n
-//--slstart	{0-239}   Sets the first drawn emulated scanline.\n
-//--clipsides	{0|1}   Clips left and rightmost 8 columns of pixels.\n
-
 // global configuration object
 Config *g_config;
-
-static void ShowUsage(char *prog)
-{
-    FCEUD_Message("show Usage");
-	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
-	puts(DriverUsage);
-#ifdef _S9XLUA_H
-	puts ("--loadlua      f       Loads lua script from filename f.");
-#endif
-#ifdef CREATE_AVI
-	puts ("--videolog     c       Calls mencoder to grab the video and audio streams to\n                         encode them. Check the documentation for more on this.");
-	puts ("--mute        {0|1}    Mutes FCEUX while still passing the audio stream to\n                         mencoder during avi creation.");
-#endif
-	puts("");
-	printf("Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-	SDL_version* v; 
-	SDL_GetVersion(v);
-#else
-	const SDL_version* v = SDL_Linked_Version();
-#endif
-	printf("Linked with SDL version %d.%d.%d\n", v->major, v->minor, v->patch);
-#ifdef GTK
-	printf("Compiled with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
-	//printf("Linked with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
-#endif
-	
-}
 
 /**
  * Loads a game, given a full path/filename.  The driver code must be
@@ -448,15 +335,6 @@ FCEUD_Update(uint8 *XBuf,
 		}
 	}
 	FCEUD_UpdateInput();
-	//if(!Count && !NoWaiting && !(eoptions&EO_NOTHROTTLE))
-	// SpeedThrottle();
-	//if(XBuf && (inited&4))
-	//{
-	// BlitScreen(XBuf);
-	//}
-	//if(Count)
-	// WriteSound(Buffer,Count,NoWaiting);
-	//FCEUD_UpdateInput();
 }
 
 /**
@@ -482,8 +360,6 @@ EMUFILE_FILE* FCEUD_UTF8_fstream(const char *fn, const char *m)
 	//return new std::fstream(fn,mode);
 }
 
-#include "SDL_rwops.h"
-//#include <android/asset_manager.h>
 /**
  * Opens a file, C++ style, to be read a byte at a time.
  */
@@ -515,7 +391,6 @@ void FCEUD_TraceInstruction() {
 }
 
 
-int noGui = 1;
 
 int KillFCEUXonFrame = 0;
 
@@ -588,7 +463,6 @@ FCEUD_GetTimeFreq(void)
 {
 	// SDL_GetTicks() is in milliseconds
 	return 1000;
-//	return SDL_GetTicks();
 }
 
 void FCEUD_Message(const char *text)
@@ -603,7 +477,6 @@ void FCEUD_PrintError(const char *errormsg)
 
 
 // dummy functions
-
 #define DUMMY(__f) \
     void __f(void) {\
         printf("%s\n", #__f);\

@@ -30,7 +30,6 @@
 
 #include "../../utils/memory.h"
 
-#include "sdl-icon.h"
 #include "dface.h"
 
 #include "../common/configSys.h"
@@ -146,7 +145,7 @@ int InitVideo(FCEUGI *gi)
 	s_window = SDL_CreateWindow("fceux game window" , SDL_WINDOWPOS_CENTERED,
 								SDL_WINDOWPOS_CENTERED, 0, 0, SDL_WINDOW_SHOWN);
 
-	FCEUI_SetShowFPS(1);
+//	FCEUI_SetShowFPS(1);
 
 	// 创建一个渲染器
 	uint32_t baseFlags = 0;//vsyncEnabled ? SDL_RENDERER_PRESENTVSYNC : 0;

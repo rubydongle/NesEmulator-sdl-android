@@ -42,8 +42,6 @@ extern long soundbufsize;
 
 extern int pal_emulation;
 
-int CLImain(int argc, char *argv[]);
-
 // Device management defaults
 #define NUM_INPUT_DEVICES 3
 

@@ -1,39 +1,14 @@
-/* FCE Ultra - NES/Famicom Emulator
- *
- * Copyright notice for this file:
- *  Copyright (C) 2002 Xodnizel
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
-//todo - ensure that #ifdef WIN32 makes sense
-//consider changing this to use sdl net stuff?
-
 #include "main.h"
 #include "input.h"
 #include "dface.h"
 #include "unix-netplay.h"
-
 #include "../../fceu.h"
 #include "../../utils/md5.h"
 #include "../../utils/memory.h"
-
-#include <string>
 #include "../common/configSys.h"
 
 #include <unistd.h>
+#include <string>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <cstring>
@@ -41,17 +16,12 @@
 #include <cstdio>
 #include <cerrno>
 #include <fcntl.h>
-
-#ifdef WIN32
-#include <winsock.h>
-#else
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#endif
 
 extern Config *g_config;
 
@@ -126,14 +96,7 @@ FCEUD_NetworkConnect(void)
 
 	// try to setup TCP_NODELAY to avoid network jitters
 	tcpopt = 1;
-#ifdef BEOS
-	error = setsockopt(TSocket, SOL_SOCKET, TCP_NODELAY, &tcpopt, sizeof(int));
-#elif WIN32
-	error = setsockopt(TSocket, SOL_TCP, TCP_NODELAY,
-						(char*)&tcpopt, sizeof(int));
-#else
 	error = setsockopt(TSocket, SOL_TCP, TCP_NODELAY, &tcpopt, sizeof(int));
-#endif
 	if(error) {
 		puts("Nodelay fail");
 	}
@@ -217,18 +180,10 @@ FCEUD_NetworkConnect(void)
 			username.c_str(), username.size());
 	}
 
-#ifdef WIN32
-	send(s_Socket, (char*)sendbuf, sblen, 0);
-#else
 	send(s_Socket, sendbuf, sblen, 0);
-#endif
 	FCEU_dfree(sendbuf);
 
-#ifdef WIN32
-	recv(s_Socket, (char*)buf, 1, 0);
-#else
 	recv(s_Socket, buf, 1, MSG_WAITALL);
-#endif
 	netdivisor = buf[0];
 
 	puts("*** Connection established.");
@@ -246,9 +201,7 @@ FCEUD_SendData(void *data,
                uint32 len)
 {
 	int check = 0, error = 0;
-#ifndef WIN32
 	error = ioctl(fileno(stdin), FIONREAD, &check);
-#endif
 	if(!error && check) {
 		char buf[1024];
 		char *f;
@@ -259,11 +212,7 @@ FCEUD_SendData(void *data,
 		FCEUI_NetplayText((uint8 *)buf);
 	}
 
-#ifdef WIN32
-	send(s_Socket, (char*)data, len ,0);
-#else
 	send(s_Socket, data, len ,0);
-#endif
 	return 1;
 }
 
@@ -291,11 +240,7 @@ FCEUD_RecvData(void *data,
 		}
 
 		if(FD_ISSET(s_Socket,&funfun)) {
-#ifdef WIN32
-			size = recv(s_Socket, (char*)data, len, 0);
-#else
 			size = recv(s_Socket, data, len, MSG_WAITALL);
-#endif
 
 			if(size == len) {
 				//unsigned long beefie;
@@ -324,11 +269,7 @@ void
 FCEUD_NetworkClose(void)
 {
 	if(s_Socket > 0) {
-#ifdef BEOS
-		closesocket(s_Socket);
-#else
 		close(s_Socket);
-#endif
 	}
 	s_Socket = -1;
 

@@ -1,22 +1,14 @@
 #include "main.h"
 #include "throttle.h"
 #include "config.h"
-
 #include "../common/cheat.h"
-
 #include "input.h"
 #include "dface.h"
-
 #include "sdl.h"
 #include "sdl-video.h"
 #include "unix-netplay.h"
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #include <unistd.h>
-
 #include <csignal>
 #include <cstring>
 #include <cerrno>
