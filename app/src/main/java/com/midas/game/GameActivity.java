@@ -19,7 +19,7 @@ import java.io.InputStream;
 
 public class GameActivity extends SDLActivity {
 
-    private static String sGameName = "shuangjielong2.nes";
+    private static String sGameName = "zhadanrenwudibannocopyright.nes";
     Vibrator vibrator;
     private int vibrationDuration = 30;
     boolean mVibrationEnable = true;

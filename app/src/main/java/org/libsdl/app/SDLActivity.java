@@ -254,6 +254,11 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         mSurface = new SDLSurface(getApplication());
 
         mLayout = new RelativeLayout(this);
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(size.x, size.y);
+        mLayout.setLayoutParams(params);
         mLayout.addView(mSurface);
 
         // Get our current screen orientation and pass it down.
@@ -272,7 +277,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         setContentView(mLayout);
 
-        setWindowStyle(false);
+        setWindowStyle(true);
 
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(this);
 
