@@ -20,19 +20,16 @@ Emulator::Emulator() {
     SDL_Log("Emulator constructor done");
 }
 
-//extern int inited;
-
-int
-Emulator::driverInitialize(FCEUGI *gi)
+int Emulator::driverInitialize(FCEUGI *gi)
 {
     if(InitVideo(gi) < 0) return 0;
-    inited|=4;
+    driverInited|=4;
 
     if(InitSound())
-        inited|=1;
+        driverInited|=1;
 
     if(InitJoysticks())
-        inited|=2;
+        driverInited|=2;
 
     int fourscore=0;
     g_config->getOption("SDL.FourScore", &fourscore);
@@ -46,21 +43,22 @@ Emulator::driverInitialize(FCEUGI *gi)
 
 void Emulator::driverKill()
 {
-//    g_config->save();
+//    if (!noconfig)
+//        g_config->save();
 
-    if(inited&2)
+    if(driverInited&2)
         KillJoysticks();
-    if(inited&4)
+    if(driverInited&4)
         KillVideo();
-    if(inited&1)
+    if(driverInited&1)
         KillSound();
-    inited=0;
+    driverInited=0;
 }
 
 int Emulator::loadGame(const char *path)
 {
     if (GameInfo) {//isloaded){
-        CloseGame();
+        closeGame();
     }
     if(!FCEUI_LoadGame(path, 0)) {
         return 0;
@@ -227,11 +225,10 @@ void Emulator::doFun()//int frameskip, int periodic_saves)
 }
 
 
-int Emulator::closeGame()
-{
-//    std::string filename;
+int Emulator::closeGame() {
+    std::string filename;
 
-    if(!GameInfo) {
+    if(!GameInfo) {//isloaded) {
         return(0);
     }
 
@@ -239,18 +236,19 @@ int Emulator::closeGame()
     g_config->getOption("SDL.AutoSaveState", &state_to_save);
     if (state_to_save < 10 && state_to_save >= 0){
         FCEUI_SelectState(state_to_save, 0);
-//        FCEUI_SaveState(NULL, false);
+        FCEUI_SaveState(NULL, false);
     }
     FCEUI_CloseGame();
 
     driverKill();
+//	isloaded = 0;
     GameInfo = 0;
 
-//    g_config->getOption("SDL.Sound.RecordFile", &filename);
-//    if(filename.size()) {
-//        FCEUI_EndWaveRecord();
-//    }
+    g_config->getOption("SDL.Sound.RecordFile", &filename);
+    if(filename.size()) {
+        FCEUI_EndWaveRecord();
+    }
 
-//    InputUserActiveFix();
+    InputUserActiveFix();
     return(1);
 }

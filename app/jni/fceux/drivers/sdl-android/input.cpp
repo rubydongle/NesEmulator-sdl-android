@@ -518,7 +518,7 @@ static void KeyboardCommands ()
 	//}
 	if (_keyonly (Hotkeys[HK_QUIT]))
 	{
-		CloseGame();
+//		CloseGame();
 		FCEUI_Kill();
 		SDL_Quit();
 		exit(0);
@@ -726,7 +726,7 @@ UpdatePhysicalInput ()
 		switch (event.type)
 		{
 			case SDL_QUIT:
-			  CloseGame ();
+//			  CloseGame ();
 			  puts ("Quit");
 			  break;
 			case SDL_FCEU_HOTKEY_EVENT:
@@ -947,7 +947,7 @@ UpdateGamepad(void)
         // if a+b+start+select is pressed, exit
         if (four_button_exit && JS == 15) {
             FCEUI_printf("all buttons pressed, exiting\n");
-            CloseGame();
+//            CloseGame();
             FCEUI_Kill();
             exit(0);
         }

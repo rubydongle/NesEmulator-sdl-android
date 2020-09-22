@@ -11,7 +11,7 @@
 
 #define PERIODIC_SAVE_INTERVAL 5000 // milliseconds
 
-static int inited = 0;
+extern int driverInited;// = 0;
 const int INVALID_STATE = 99;
 
 extern int isloaded;
@@ -20,6 +20,8 @@ extern int dendy;
 extern int pal_emulation;
 extern bool swapDuty;
 
+
+int DriverInitialize(FCEUGI *gi);
 int LoadGame(const char *path);
 int CloseGame(void);
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);

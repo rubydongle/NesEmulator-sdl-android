@@ -12,6 +12,8 @@ public:
     int loadGame(int argc, char **argv);
     int closeGame();
     void doFun();
+    int driverInitialize(FCEUGI *gi);
+    void driverKill();
 
 //    FCEUGI* getGameInfo() {
 //        return gameInfo;
@@ -29,8 +31,10 @@ private:
     int frameSkip = 0;
     int periodicSaves = 0;
 
-    int driverInitialize(FCEUGI *gi);
-    void driverKill();
+    int videoInited = 0;
+    int audioInited = 0;
+    int joyStickInited = 0;
+
 };
 
 

@@ -425,6 +425,7 @@ public class GameActivity extends SDLActivity {
             }
         });
         AdView mAdView = findViewById(R.id.adView);
+//        mAdView.setAdUnitId("ca-app-pub-2193425075448632/8668729916");
         mAdView.setAdListener(new AdListener(){
             @Override
             public void onAdClicked() {
