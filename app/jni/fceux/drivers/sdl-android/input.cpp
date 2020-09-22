@@ -3,7 +3,6 @@
 #include "input.h"
 #include "config.h"
 #include "sdl-video.h"
-#include "sdl.h"
 #include "../common/cheat.h"
 #include "../../movie.h"
 #include "../../fceu.h"
@@ -146,12 +145,12 @@ int Hotkeys[HK_MAX] = { 0 };
 
 // on every cycle of keyboardinput()
 void
-setHotKeys ()
+setHotKeys (Config* config)
 {
 	std::string prefix = "SDL.Hotkeys.";
 	for (int i = 0; i < HK_MAX; i++)
 	{
-		g_config->getOption (prefix + HotkeyStrings[i], &Hotkeys[i]);
+		config->getOption (prefix + HotkeyStrings[i], &Hotkeys[i]);
 	}
 	return;
 }

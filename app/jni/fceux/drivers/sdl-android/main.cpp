@@ -1,28 +1,22 @@
 #include "main.h"
 #include "throttle.h"
 #include "config.h"
-
 #include "../common/cheat.h"
 #include "../../fceu.h"
 #include "../../movie.h"
 #include "../../version.h"
-#ifdef _S9XLUA_H
-#include "../../fceulua.h"
-#endif
-
 #include "input.h"
 #include "dface.h"
-
-#include "sdl.h"
 #include "sdl-video.h"
 #include "unix-netplay.h"
-
 #include "../common/configSys.h"
 #include "../../oldmovie.h"
 #include "../../types.h"
-
 #ifdef CREATE_AVI
 #include "../videolog/nesvideos-piece.h"
+#endif
+#ifdef _S9XLUA_H
+#include "../../fceulua.h"
 #endif
 
 #include <unistd.h>
@@ -39,15 +33,17 @@
 #include <iostream>
 #include <fstream>
 
+#include "Emulator.h"
+
 
 extern double g_fpsScale;
 extern bool MaxSpeed;
 
-int isloaded;
+//int isloaded;
 bool turbo = false;
 int closeFinishedMovie = 0;
 int eoptions=0;
-static int inited = 0;
+//static int inited = 0;
 
 static void DriverKill(void);
 static int DriverInitialize(FCEUGI *gi);
@@ -72,10 +68,10 @@ Config *g_config;
  */
 int LoadGame(const char *path)
 {
-    if (isloaded){
+    if (GameInfo) {//isloaded){
         CloseGame();
     }
-	if(!FCEUI_LoadGame(path, 1)) {
+	if(!FCEUI_LoadGame(path, 0)) {
 		return 0;
 	}
 
@@ -108,7 +104,7 @@ int LoadGame(const char *path)
 			g_config->setOption("SDL.Sound.RecordFile", "");
 		}
 	}
-	isloaded = 1;
+//	isloaded = 1;
 
 	FCEUD_NetworkConnect();
 	return 1;
@@ -118,11 +114,10 @@ int LoadGame(const char *path)
  * Closes a game.  Frees memory, and deinitializes the drivers.
  */
 int
-CloseGame()
-{
+CloseGame() {
 	std::string filename;
 
-	if(!isloaded) {
+	if(!GameInfo) {//isloaded) {
 		return(0);
 	}
 
@@ -135,7 +130,7 @@ CloseGame()
 	FCEUI_CloseGame();
 
 	DriverKill();
-	isloaded = 0;
+//	isloaded = 0;
 	GameInfo = 0;
 
 	g_config->getOption("SDL.Sound.RecordFile", &filename);
@@ -147,7 +142,7 @@ CloseGame()
 	return(1);
 }
 
-void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
+//void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
 
 static void DoFun(int frameskip, int periodic_saves)
 {
@@ -318,6 +313,7 @@ FCEUD_Update(uint8 *XBuf,
 				//	printf("Overwrite: %d\n", (Count <= tmpcan)?Count : tmpcan);
 				#ifdef CREATE_AVI
 				if (!mutecapture)
+
 				#endif
 				  WriteSound(Buffer, (Count <= tmpcan)?Count : tmpcan);
 				tmpcan -= Count;
@@ -394,7 +390,7 @@ void FCEUD_TraceInstruction() {
 
 int KillFCEUXonFrame = 0;
 
-int main(int argc, char *argv[]) {
+int Xmain(int argc, char *argv[]) {
 	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
 	if(SDL_Init(SDL_INIT_VIDEO)) {
 		SDL_Log("Could not initialize SDL: %s.\n", SDL_GetError());
@@ -403,22 +399,22 @@ int main(int argc, char *argv[]) {
 	// 设置竖屏 参考SDLActivity中setOrientationBis
 	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft");
 
-	g_config = InitConfig();
-	if(!g_config) {
-		SDL_Quit();
-		SDL_Log("InitConfig Failed\n");
-		return -1;
-	}
-
 	int error = FCEUI_Initialize();
 	if(error != 1) {
 		SDL_Log("FCUI_Initialize failed errno:%d", error);
 		SDL_Quit();
 		return -1;
 	}
+
+	g_config = InitConfig();
+	if(!g_config) {
+		SDL_Quit();
+		SDL_Log("InitConfig Failed\n");
+		return -1;
+	}
 	UpdateInput(g_config);
 	UpdateEMUCore(g_config);
-	setHotKeys();
+	setHotKeys(g_config);
 
 	int romIndex = g_config->parse(argc, argv);
 	error = LoadGame(argv[romIndex]);
@@ -436,6 +432,61 @@ int main(int argc, char *argv[]) {
 	while(GameInfo)
 	{
 		DoFun(frameskip, periodic_saves);
+	}
+	CloseGame();
+
+	// exit the infrastructure
+	FCEUI_Kill();
+	SDL_Quit();
+	return 0;
+
+}
+
+int main(int argc, char *argv[]) {
+	FCEUD_Message("Starting " FCEU_NAME_AND_VERSION "...\n");
+	if(SDL_Init(SDL_INIT_VIDEO)) {
+		SDL_Log("Could not initialize SDL: %s.\n", SDL_GetError());
+		return(-1);
+	}
+	// 设置竖屏 参考SDLActivity中setOrientationBis
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft");
+
+	int error = FCEUI_Initialize();
+	if(error != 1) {
+		SDL_Log("FCUI_Initialize failed errno:%d", error);
+		SDL_Quit();
+		return -1;
+	}
+
+//	g_config = InitConfig();
+	Emulator* emulator = new Emulator();
+	if(!g_config) {
+		SDL_Quit();
+		SDL_Log("InitConfig Failed\n");
+		return -1;
+	}
+//	UpdateInput(g_config);
+//	UpdateEMUCore(g_config);
+//	setHotKeys(g_config);
+
+	int romIndex = g_config->parse(argc, argv);
+	error = LoadGame(argv[romIndex]);
+//	error = emulator->loadGame(argv[romIndex]);
+//	error = LoadGame("/data/data/org.libsdl.app/files/魂斗罗1中文无限命.nes");
+	if(error != 1) {
+		SDL_Log("LoadGame error:%d\n", error);
+		DriverKill();
+		SDL_Quit();
+		return -1;
+	}
+	SDL_Log("LoadGame done");
+
+	int frameskip = 0;
+	int periodic_saves = 0;
+	while(GameInfo)
+	{
+		emulator->doFun();
+//		DoFun(frameskip, periodic_saves);
 	}
 	CloseGame();
 

@@ -255,9 +255,10 @@ LOCAL_SRC_FILES := \
 	${LOCAL_PATH}/drivers/sdl-android/sdl-joystick.cpp \
 	${LOCAL_PATH}/drivers/sdl-android/sdl-throttle.cpp \
 	${LOCAL_PATH}/drivers/sdl-android/unix-netplay.cpp \
-    ${LOCAL_PATH}/drivers/sdl-android/sdl.cpp \
+    ${LOCAL_PATH}/drivers/sdl-android/main.cpp \
 	${LOCAL_PATH}/drivers/sdl-android/sdl-sound.cpp   \
 	${LOCAL_PATH}/drivers/sdl-android/sdl-video.cpp \
+	${LOCAL_PATH}/drivers/sdl-android/Emulator.cpp \
 	#${LOCAL_PATH}/drivers/sdl-android/sdl-netplay.cpp  \
 	#${LOCAL_PATH}/drivers/sdl-android/sdl-opengl.cpp \
 

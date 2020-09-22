@@ -1,7 +1,7 @@
 /// \file
 /// \brief Handles emulation speed throttling using the SDL timing functions.
 
-#include "sdl.h"
+#include "main.h"
 #include "throttle.h"
 
 static const double Slowest = 0.015625; // 1/64x speed (around 1 fps on NTSC)

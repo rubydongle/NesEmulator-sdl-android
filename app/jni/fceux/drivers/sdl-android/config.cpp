@@ -4,7 +4,6 @@
 #include "../common/cheat.h"
 #include "input.h"
 #include "dface.h"
-#include "sdl.h"
 #include "sdl-video.h"
 #include "unix-netplay.h"
 
@@ -105,9 +104,7 @@ GetBaseDirectory(std::string &dir)
 
 // returns a config structure with default options
 // also creates config base directory (ie: /home/user/.fceux as well as subdirs
-Config *
-InitConfig()
-{
+Config* InitConfig() {
 	std::string dir, prefix;
 	Config *config;
 

@@ -1,6 +1,6 @@
 #define GL_GLEXT_LEGACY
 
-#include "sdl.h"
+#include "main.h"
 #include "sdl-opengl.h"
 #include "../common/vidblit.h"
 #include "../../utils/memory.h"

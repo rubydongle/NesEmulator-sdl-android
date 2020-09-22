@@ -1,4 +1,4 @@
-#include "sdl.h"
+#include "main.h"
 
 #include <cstdlib>
 #include <unistd.h>

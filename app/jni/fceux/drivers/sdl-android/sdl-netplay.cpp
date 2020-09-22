@@ -1,4 +1,4 @@
-#include "sdl.h"
+#include "main.h"
 #include "input.h"
 #include <SDL_net.h>
 #include "sdl-netplay.h"
