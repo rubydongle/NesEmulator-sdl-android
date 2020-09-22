@@ -7,3 +7,4 @@ app/.externalNativeBuild/
 .cxx/
 *gradle-wrapper.properties
 *local.properties
+app/release/
