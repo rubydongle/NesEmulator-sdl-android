@@ -6,7 +6,6 @@
 #include <SDL.h>
 #endif
 
-uint32 PtoV(uint16 x, uint16 y);
 bool FCEUD_ShouldDrawInputAids();
 bool FCEUI_AviDisableMovieMessages();
 bool FCEUI_AviEnableHUDrecording();

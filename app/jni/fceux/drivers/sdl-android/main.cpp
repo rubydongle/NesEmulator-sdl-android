@@ -51,69 +51,6 @@ bool swapDuty;
 // global configuration object
 Config *g_config;
 
-/**
- * Update the video, audio, and input subsystems with the provided
- * video (XBuf) and audio (Buffer) information.
- */
-void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count) {
-	extern int FCEUDnetplay;
-	int ocount = Count;
-	// apply frame scaling to Count
-	Count = (int)(Count / g_fpsScale);
-	if(Count) {
-		int32 can=GetWriteSound();
-		static int uflow=0;
-		int32 tmpcan;
-
-		// don't underflow when scaling fps
-		if(can >= GetMaxSound() && g_fpsScale==1.0) uflow=1;	/* Go into massive underflow mode. */
-
-		if(can > Count) can=Count;
-		else uflow=0;
-
-		WriteSound(Buffer,can);
-		//if(uflow) puts("Underflow");
-		tmpcan = GetWriteSound();
-		// don't underflow when scaling fps
-		if(g_fpsScale>1.0 || ((tmpcan < Count*0.90) && !uflow)) {
-			if(XBuf && (driverInited&4) && !(NoWaiting & 2))
-				BlitScreen(XBuf);
-			Buffer+=can;
-			Count-=can;
-			if(Count) {
-				if(NoWaiting) {
-					can=GetWriteSound();
-					if(Count>can) Count=can;
-					WriteSound(Buffer,Count);
-				} else {
-					while(Count>0) {
-						WriteSound(Buffer,(Count<ocount) ? Count : ocount);
-						Count -= ocount;
-					}
-				}
-			}
-		} //else puts("Skipped");
-		else if(!NoWaiting && FCEUDnetplay && (uflow || tmpcan >= (Count * 1.8))) {
-			if(Count > tmpcan) Count=tmpcan;
-			while(tmpcan > 0) {
-				//	printf("Overwrite: %d\n", (Count <= tmpcan)?Count : tmpcan);
-				WriteSound(Buffer, (Count <= tmpcan)?Count : tmpcan);
-				tmpcan -= Count;
-			}
-		}
-
-	} else {
-		if(!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
-		while (SpeedThrottle())
-		{
-			FCEUD_UpdateInput();
-		}
-		if(XBuf && (driverInited&4)) {
-			BlitScreen(XBuf);
-		}
-	}
-	FCEUD_UpdateInput();
-}
 
 /**
  * Opens a file to be read a byte at a time.

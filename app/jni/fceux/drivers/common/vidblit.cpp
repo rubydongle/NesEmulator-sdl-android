@@ -117,9 +117,9 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 		
 		switch (specfilteropt)
 		{
-		//case 0: // Composite
-			//ntsc_setup = nes_ntsc_composite;
-			//break;
+		case 0: // Composite
+			ntsc_setup = nes_ntsc_composite;
+			break;
 		case 1: //S-Video
 			ntsc_setup = nes_ntsc_svideo;
 			break;

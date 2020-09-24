@@ -248,8 +248,6 @@ LOCAL_SRC_FILES := \
 	${LOCAL_PATH}/drivers/common/vidblit.cpp \
 	${LOCAL_PATH}/drivers/common/os_utils.cpp \
 	${LOCAL_PATH}/drivers/common/nes_ntsc.c \
-	${LOCAL_PATH}/drivers/videolog/nesvideos-piece.cpp \
-	${LOCAL_PATH}/drivers/videolog/rgbtorgb.cpp \
 	${LOCAL_PATH}/drivers/sdl-android/config.cpp \
 	${LOCAL_PATH}/drivers/sdl-android/input.cpp  \
 	${LOCAL_PATH}/drivers/sdl-android/sdl-joystick.cpp \
@@ -259,8 +257,10 @@ LOCAL_SRC_FILES := \
 	${LOCAL_PATH}/drivers/sdl-android/sdl-sound.cpp   \
 	${LOCAL_PATH}/drivers/sdl-android/sdl-video.cpp \
 	${LOCAL_PATH}/drivers/sdl-android/Emulator.cpp \
-	#${LOCAL_PATH}/drivers/sdl-android/sdl-netplay.cpp  \
-	#${LOCAL_PATH}/drivers/sdl-android/sdl-opengl.cpp \
+#	${LOCAL_PATH}/drivers/videolog/nesvideos-piece.cpp \
+#	${LOCAL_PATH}/drivers/videolog/rgbtorgb.cpp \
+#	${LOCAL_PATH}/drivers/sdl-android/sdl-netplay.cpp  \
+#	${LOCAL_PATH}/drivers/sdl-android/sdl-opengl.cpp \
 
 LOCAL_SHARED_LIBRARIES := SDL2 zlib
 

@@ -9,16 +9,13 @@ class Emulator {
 public:
     Emulator();
     int loadGame(const char* path);
-    int loadGame(int argc, char **argv);
+//    int loadGame(int argc, char **argv);
     int closeGame();
     void doFun();
     int driverInitialize(FCEUGI *gi);
     void driverKill();
     void setBaseDirectory(const char* path);
-
-//    FCEUGI* getGameInfo() {
-//        return gameInfo;
-//    };
+    void updateEmulateData(uint8 *xbuf, int32 *sbuf, int scount);
 
 //    Config* getConfig() {
 //        return gConfig;
@@ -26,9 +23,7 @@ public:
 
 private:
 //    Config *gConfig;
-//    FCEUGI *gameInfo;
     int isPal;
-//    int inited = 0;
     int frameSkip = 0;
     int periodicSaves = 0;
 

@@ -24,7 +24,7 @@ extern bool swapDuty;
 int DriverInitialize(FCEUGI *gi);
 int LoadGame(const char *path);
 int CloseGame(void);
-void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
+//void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
 uint64 FCEUD_GetTime();
 
 extern int eoptions;

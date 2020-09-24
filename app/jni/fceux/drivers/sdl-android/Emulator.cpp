@@ -7,9 +7,11 @@
 #include "SDL.h"
 #include "throttle.h"
 
-//#include <unistd.h>
-
 extern Config* g_config;
+
+#define WIDTH 256
+#define HEIGHT_PAL 240
+#define HEIGHT_NTSC 224
 
 Emulator::Emulator() {
     SDL_Log("Emulator start constructor");
@@ -91,6 +93,7 @@ int Emulator::loadGame(const char *path)
     if(!FCEUI_LoadGame(path, 0)) {
         return 0;
     }
+    FCEUI_SetVidSystem(isPal ? 1 : 0);
 
     int state_to_load;
     g_config->getOption("SDL.AutoLoadState", &state_to_load);
@@ -107,12 +110,12 @@ int Emulator::loadGame(const char *path)
     }
 
     // set pal/ntsc
-    int id;
-    g_config->getOption("SDL.PAL", &id);
-    FCEUI_SetRegion(id);
+//    int id;
+//    g_config->getOption("SDL.PAL", &id);
+//    FCEUI_SetRegion(id);
 
-    g_config->getOption("SDL.SwapDuty", &id);
-    swapDuty = id;
+//    g_config->getOption("SDL.SwapDuty", &id);
+//    swapDuty = id;
 
     std::string filename;
     g_config->getOption("SDL.Sound.RecordFile", &filename);
@@ -122,51 +125,6 @@ int Emulator::loadGame(const char *path)
         }
     }
 //	isloaded = 1;
-
-    FCEUD_NetworkConnect();
-    return 1;
-}
-
-int Emulator::loadGame(int argc, char** argv)
-{
-    int romIndex = g_config->parse(argc, argv);
-    const char* path = argv[romIndex];
-    if (GameInfo){
-        closeGame();
-    }
-    if (!FCEUI_LoadGame(path, 0)) {
-        return 0;
-    }
-
-    int state_to_load;
-    g_config->getOption("SDL.AutoLoadState", &state_to_load);
-    if (state_to_load >= 0 && state_to_load < 10){
-        FCEUI_SelectState(state_to_load, 0);
-        FCEUI_LoadState(NULL, false);
-    }
-
-    ParseGIInput(GameInfo);
-    RefreshThrottleFPS();
-
-    if(!driverInitialize(GameInfo)) {
-        return(0);
-    }
-
-    // set pal/ntsc
-    int id;
-    g_config->getOption("SDL.PAL", &id);
-    FCEUI_SetRegion(id);
-
-    g_config->getOption("SDL.SwapDuty", &id);
-    swapDuty = id;
-
-    std::string filename;
-    g_config->getOption("SDL.Sound.RecordFile", &filename);
-    if(filename.size()) {
-        if(!FCEUI_BeginWaveRecord(filename.c_str())) {
-            g_config->setOption("SDL.Sound.RecordFile", "");
-        }
-    }
 
     FCEUD_NetworkConnect();
     return 1;
@@ -196,7 +154,8 @@ void Emulator::doFun()//int frameskip, int periodic_saves)
         gfx = 0;
     }
     FCEUI_Emulate(&gfx, &sound, &ssize, fskipc);
-    FCEUD_Update(gfx, sound, ssize);
+    updateEmulateData(gfx, sound, ssize);
+//    FCEUD_Update(gfx, sound, ssize);
 
     if(opause!=FCEUI_EmulationPaused()) {
         opause=FCEUI_EmulationPaused();
@@ -204,6 +163,66 @@ void Emulator::doFun()//int frameskip, int periodic_saves)
     }
 }
 
+extern double g_fpsScale;
+void Emulator::updateEmulateData(uint8 *xbuf, int32 *sbuf, int scount) {
+    extern int FCEUDnetplay;
+    int ocount = scount;
+    // apply frame scaling to Count
+    scount = (int)(scount / g_fpsScale);
+    if(scount) {
+        int32 can=GetWriteSound();
+        static int uflow=0;
+        int32 tmpcan;
+
+        // don't underflow when scaling fps
+        if(can >= GetMaxSound() && g_fpsScale==1.0) uflow=1;	/* Go into massive underflow mode. */
+
+        if(can > scount) can=scount;
+        else uflow=0;
+
+        WriteSound(sbuf, can);
+        //if(uflow) puts("Underflow");
+        tmpcan = GetWriteSound();
+        // don't underflow when scaling fps
+        if(g_fpsScale>1.0 || ((tmpcan < scount * 0.90) && !uflow)) {
+            if(xbuf && videoInited && !(NoWaiting & 2))
+                BlitScreen(xbuf);
+            sbuf+=can;
+            scount-=can;
+            if(scount) {
+                if(NoWaiting) {
+                    can=GetWriteSound();
+                    if(scount > can) scount=can;
+                    WriteSound(sbuf, scount);
+                } else {
+                    while(scount > 0) {
+                        WriteSound(sbuf, (scount < ocount) ? scount : ocount);
+                        scount -= ocount;
+                    }
+                }
+            }
+        } //else puts("Skipped");
+//        else if(!NoWaiting && FCEUDnetplay && (uflow || tmpcan >= (scount * 1.8))) {
+//            if(scount > tmpcan) scount=tmpcan;
+//            while(tmpcan > 0) {
+//                //	printf("Overwrite: %d\n", (Count <= tmpcan)?Count : tmpcan);
+//                WriteSound(sbuf, (scount <= tmpcan) ? scount : tmpcan);
+//                tmpcan -= scount;
+//            }
+//        }
+
+    } else {
+        if(!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
+            while (SpeedThrottle())
+            {
+                FCEUD_UpdateInput();
+            }
+        if(xbuf && videoInited) {
+            BlitScreen(xbuf);
+        }
+    }
+    FCEUD_UpdateInput();
+}
 
 int Emulator::closeGame() {
     std::string filename;

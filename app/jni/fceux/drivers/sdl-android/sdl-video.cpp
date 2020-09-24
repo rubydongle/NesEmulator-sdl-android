@@ -4,11 +4,8 @@
 #include "../../fceu.h"
 #include "../../version.h"
 #include "../../video.h"
-
 #include "../../utils/memory.h"
-
 #include "dface.h"
-
 #include "../common/configSys.h"
 #include "sdl-video.h"
 
@@ -19,10 +16,25 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <GLES2/gl2.h>
 
 // NES resolution = 256x240
-const int NES_WIDTH = 256;
-const int NES_HEIGHT = 240;
+#define NES_WIDTH  256
+//#define NES_HEIGHT  240
+#define NES_HEIGHT  224
+
+static SDL_Color s_psdl[256];
+//#define PALETTE_TYPE unsigned int
+#define GET_PIXEL(buf, idx) emuPalette[buf[idx]]
+
+//PALETTE_TYPE emuPalette[256];
+//void setPalette(int idx, int value) {
+//	emuPalette[idx] = value;
+//}
+
+#define WIDTH 256
+#define HEIGHT_PAL 240
+#define HEIGHT_NTSC 224
 
 // GLOBALS
 extern Config *g_config;
@@ -41,7 +53,7 @@ static int s_srendline, s_erendline;
 static int s_tlines;
 static int s_inited;
 
-static double s_exs, s_eys;
+static double s_exs = 1, s_eys = 1;
 static int s_eefx;
 static int s_clipSides;
 static int s_fullscreen;
@@ -63,6 +75,7 @@ bool FCEUD_ShouldDrawInputAids()
 {
 	return s_fullscreen!=0;
 }
+
 
 int
 KillVideo()
@@ -126,6 +139,7 @@ int InitVideo(FCEUGI *gi)
 								SDL_WINDOWPOS_CENTERED, 0, 0, SDL_WINDOW_SHOWN);
 
 //	FCEUI_SetShowFPS(1);
+//	InitMyOpenGL();
 
 	// 创建一个渲染器
 	uint32_t baseFlags = 0;//vsyncEnabled ? SDL_RENDERER_PRESENTVSYNC : 0;
@@ -142,24 +156,26 @@ int InitVideo(FCEUGI *gi)
 			return -1;
 		}
 	}
-	int sdlRendW, sdlRendH;
-	SDL_GetRendererOutputSize( s_renderer, &sdlRendW, &sdlRendH );
-	SDL_Log("[SDL] Renderer Output Size: %i x %i \n", sdlRendW, sdlRendH );
+//	int sdlRendW, sdlRendH;
+//	SDL_GetRendererOutputSize( s_renderer, &sdlRendW, &sdlRendH );
+//	SDL_Log("[SDL] Renderer Output Size: %i x %i \n", sdlRendW, sdlRendH );
 
 	int xres, yres;
 	SDL_GetWindowSize(s_window, &xres, &yres);
 
+	FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
+	s_tlines = s_erendline - s_srendline + 1;
+
 	s_texture = SDL_CreateTexture(s_renderer,
 								  SDL_PIXELFORMAT_ARGB8888,
 								  SDL_TEXTUREACCESS_STREAMING,
-								  xres, yres);
+								  WIDTH, s_tlines);//HEIGHT_NTSC);
+//								  xres, yres);
 
 	SDL_SetRenderDrawColor(s_renderer, 100, 100, 100, 255);
 //	SDL_RenderClear(s_renderer);
 //	SDL_RenderPresent(s_renderer);
 
-	FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
-	s_tlines = s_erendline - s_srendline + 1;
 
 	if (!SDL_WasInit(SDL_INIT_VIDEO)) {
 		error = SDL_InitSubSystem(SDL_INIT_VIDEO);
@@ -170,51 +186,48 @@ int InitVideo(FCEUGI *gi)
 	}
 	s_inited = 1;
 
-	double auto_xscale;// = GetXScale(xres);
-	double auto_yscale;// = GetYScale(yres);
-	double native_ratio = ((double)NWIDTH) / s_tlines;
-	double screen_ratio = ((double)xres) / yres;
-	int keep_ratio = 1;
+//	double auto_xscale;// = GetXScale(xres);
+//	double auto_yscale;// = GetYScale(yres);
+//	double native_ratio = ((double)NWIDTH) / s_tlines;
+//	double screen_ratio = ((double)xres) / yres;
+//	int keep_ratio = 1;
+//
+//	if (screen_ratio < native_ratio) {
+//		auto_xscale = auto_yscale = GetXScale(xres);
+//		if (keep_ratio) {
+//			auto_yscale = GetYScale(yres);
+//		}
+//	} else {
+//		auto_yscale = auto_xscale = GetYScale(xres);
+//		if (keep_ratio) {
+//			auto_xscale = GetXScale(yres);
+//		}
+//	}
 
-	if (screen_ratio < native_ratio) {
-		auto_xscale = auto_yscale = GetXScale(xres);
-		if (keep_ratio) {
-			auto_yscale = GetYScale(yres);
-		}
-	} else {
-		auto_yscale = auto_xscale = GetYScale(xres);
-		if (keep_ratio) {
-			auto_xscale = GetXScale(yres);
-		}
-	}
-	s_exs = auto_xscale;
-	s_eys = auto_yscale;
-	s_eefx = 0;
-
-	uint32_t  rmask, gmask, bmask, amask;
-	amask = 0xFF000000;
-#ifdef LSB_FIRST
-	rmask = 0x00FF0000;
-	gmask = 0x0000FF00;
-	bmask = 0x000000FF;
-#else
-	rmask = 0x00FF0000;
-	gmask = 0x0000FF00;
-	bmask = 0x000000FF;
-#endif
-	s_BlitBuf = SDL_CreateRGBSurface(0, xres, yres,
-									 s_curbpp,
-									 rmask,
-									 gmask,
-									 bmask, amask);
+//	uint32_t  rmask, gmask, bmask, amask;
+//	amask = 0xFF000000;
+//#ifdef LSB_FIRST
+//	rmask = 0x00FF0000;
+//	gmask = 0x0000FF00;
+//	bmask = 0x000000FF;
+//#else
+//	rmask = 0x00FF0000;
+//	gmask = 0x0000FF00;
+//	bmask = 0x000000FF;
+//#endif
+//	s_BlitBuf = SDL_CreateRGBSurface(0, xres, yres,
+//									 s_curbpp,
+//									 rmask,
+//									 gmask,
+//									 bmask, amask);
 
 //	s_texture = SDL_CreateTexture(s_renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, xres, yres);
 
-	InitBlitToHigh(s_curbpp >> 3,
-				   rmask,
-				   gmask,
-				   bmask,
-				   s_eefx, s_sponge, 0);
+//	InitBlitToHigh(s_curbpp >> 3,
+//				   rmask,
+//				   gmask,
+//				   bmask,
+//				   s_eefx, s_sponge, 0);
 
 	return 0;
 }
@@ -248,16 +261,11 @@ void ToggleFS()
 		FCEUI_ToggleEmulationPause();
 }
 
-static SDL_Color s_psdl[256];
 
 /**
  * Sets the color for a particular index in the palette.
  */
-void
-FCEUD_SetPalette(uint8 index,
-				 uint8 r,
-				 uint8 g,
-				 uint8 b)
+void FCEUD_SetPalette(uint8 index, uint8 r, uint8 g, uint8 b)
 {
 	s_psdl[index].r = r;
 	s_psdl[index].g = g;
@@ -275,27 +283,6 @@ void FCEUD_GetPalette(uint8 index, uint8 *r, uint8 *g, uint8 *b) {
 	*b = s_psdl[index].b;
 }
 
-/**
- * Pushes the palette structure into the underlying video subsystem.
- */
-static void RedoPalette() {
-	if(s_curbpp > 8) {
-		SetPaletteBlitToHigh((uint8*)s_psdl);
-	} else {
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-		//TODO - SDL2
-#else
-		SDL_SetPalette(s_screen, SDL_PHYSPAL, s_psdl, 0, 256);
-#endif
-	}
-}
-// XXX soules - console lock/unlock unimplemented?
-
-///Currently unimplemented.
-void LockConsole(){}
-
-///Currently unimplemented.
-void UnlockConsole(){}
 
 /**
  * Pushes the given buffer of bits to the screen.
@@ -303,52 +290,79 @@ void UnlockConsole(){}
 void
 BlitScreen(uint8 *XBuf)
 {
-	SDL_Surface *TmpScreen;
-	uint8 *dest;
-	int xo = 0, yo = 0;
 	XBuf += s_srendline * 256;
-	TmpScreen = s_BlitBuf;
+	SDL_RenderClear(s_renderer);
+	//-------------------------
+	uint8* texture_buffer;
+	int rowPitch;
+	SDL_LockTexture(s_texture, nullptr, (void**)&texture_buffer, &rowPitch);
 
-	if (s_paletterefresh)
-	{
-		RedoPalette();
-		s_paletterefresh = 0;
-	}
+	int newWidth, newHeight;
+	SDL_GetWindowSize(s_window, &newWidth, &newHeight);//&xres, &yres);
+	int h =newHeight = s_tlines;
+	int w = newWidth = WIDTH;
+	unsigned char *buf = XBuf;
+	int outOffset = 0;
+	int inOffset = 0;//offsetIdx;
+	int origWidth = WIDTH;
+	int origHeight = s_tlines;//isPal ? HEIGHT_PAL : HEIGHT_NTSC;
 
-	// lock the display, if necessary
-	if(SDL_MUSTLOCK(TmpScreen)) {
-		if(SDL_LockSurface(TmpScreen) < 0) {
-			return;
+	int myd = (origHeight / h) * origWidth - origWidth;
+	int myr = origHeight % h;
+	int mxd = origWidth / w;
+	int mxr = origWidth % w;
+
+	for (int y = newHeight, ye = 0; y > 0; y--) {
+		int *data = (int *) texture_buffer;
+
+		for (int x = newWidth, xe = 0; x > 0; x--) {
+			SDL_Color color = s_psdl[buf[inOffset]];
+			int r,g,b;
+#ifdef LSB_FIRST
+			data[outOffset++] = ((uint32) 0xFF000000) | (color.b << 16) | (color.g << 8) | (color.r << 0);
+#else
+			data[outOffset++] = ((uint32) 0xFF000000) | (color.r << 16) | (color.g << 8) | (color.b << 0);
+#endif
+			inOffset += mxd;
+			xe += mxr;
+
+			if (xe >= newWidth) {
+				xe -= newWidth;
+				inOffset++;
+			}
+		}
+
+		inOffset += myd;
+		ye += myr;
+
+		if (ye >= newHeight) {
+			ye -= newHeight;
+			inOffset += origWidth;
 		}
 	}
 
-	dest = (uint8*)TmpScreen->pixels;
-
-	Blit8ToHigh(XBuf + NOFFSET, dest, NWIDTH, s_tlines,
-				TmpScreen->pitch, (int)s_exs, (int)s_eys);
-
-	// unlock the display, if necessary
-	if(SDL_MUSTLOCK(TmpScreen)) {
-		SDL_UnlockSurface(TmpScreen);
-	}
-
+	SDL_UnlockTexture(s_texture);
+	//------------------------
 	SDL_Rect sdlRect;
 	int scale = 0;
 	if (!scale) {
 		int xres, yres;
 		SDL_GetWindowSize(s_window, &xres, &yres);
 		//double scale = xres/NES_WIDTH > yres / NES_HEIGHT ? yres / NES_HEIGHT : yres / NES_WIDTH;//s_exs < s_eys ? s_exs : s_eys;
-		double scale = s_exs < s_eys ? s_exs : s_eys;
+		double scaleX = xres / WIDTH;
+		double scaleY = yres /s_tlines;
+		double scale = scaleX < scaleY ? scaleX : scaleY;//s_exs : s_eys;
 		sdlRect.x = (xres - (NES_WIDTH *scale)) / 2;
 		sdlRect.y = 0;
-		sdlRect.w = NES_WIDTH * scale;
-//		sdlRect.h = s_tlines * scale;
-		sdlRect.h = NES_HEIGHT * scale;
+		sdlRect.w = (NES_WIDTH * yres)/s_tlines;//scale;
+		sdlRect.h = yres;//s_tlines * scale;
+//		sdlRect.h = NES_HEIGHT * scale;
 	}
-
-	SDL_UpdateTexture(s_texture, NULL, TmpScreen->pixels, TmpScreen->pitch);
-	SDL_RenderClear(s_renderer);
-	SDL_RenderCopy(s_renderer, s_texture, NULL, &sdlRect);
+//	SDL_Rect dstrect = {0, 0, (int)NWIDTH, (int)s_tlines};
+//	SDL_Rect destRect = {0, 0, (int)newWidth, newHeight};
+//	SDL_Rect destRect = {0, 0, (int)xres, yres};
+//	SDL_RenderCopy(s_renderer, s_texture, &sourceRect, &destRect);
+	SDL_RenderCopy(s_renderer, s_texture, 0, &sdlRect);//&destRect);
 	SDL_RenderPresent(s_renderer);
 }
 
