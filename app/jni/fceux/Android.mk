@@ -257,6 +257,8 @@ LOCAL_SRC_FILES := \
 	${LOCAL_PATH}/drivers/sdl-android/sdl-sound.cpp   \
 	${LOCAL_PATH}/drivers/sdl-android/sdl-video.cpp \
 	${LOCAL_PATH}/drivers/sdl-android/Emulator.cpp \
+	${LOCAL_PATH}/drivers/sdl-android/VideoDriver.cpp \
+	${LOCAL_PATH}/drivers/sdl-android/AudioDriver.cpp \
 #	${LOCAL_PATH}/drivers/videolog/nesvideos-piece.cpp \
 #	${LOCAL_PATH}/drivers/videolog/rgbtorgb.cpp \
 #	${LOCAL_PATH}/drivers/sdl-android/sdl-netplay.cpp  \
