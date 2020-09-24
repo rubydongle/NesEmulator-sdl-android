@@ -428,9 +428,9 @@ public class GameActivity extends SDLActivity {
 //        mAdView.setAdUnitId("ca-app-pub-2193425075448632/8668729916");
         mAdView.setAdListener(new AdListener(){
             @Override
-            public void onAdClicked() {
-                super.onAdClicked();
-                mAdView.setVisibility(View.INVISIBLE);
+            public void onAdOpened() {
+                super.onAdOpened();
+                mAdView.setVisibility(View.GONE);
             }
         });
 
