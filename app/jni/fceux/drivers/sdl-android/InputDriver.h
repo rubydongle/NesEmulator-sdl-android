@@ -1,0 +1,13 @@
+#ifndef NESEMULATOR_SDL_ANDROID_INPUTDRIVER_H
+#define NESEMULATOR_SDL_ANDROID_INPUTDRIVER_H
+
+#define NUM_INPUT_DEVICES 3
+
+class InputDriver {
+private:
+    int gametype;
+    int UsrInputType[NUM_INPUT_DEVICES];
+    int CurInputType[NUM_INPUT_DEVICES];
+};
+
+#endif //NESEMULATOR_SDL_ANDROID_INPUTDRIVER_H
