@@ -4,6 +4,7 @@
 
 #include "../common/configSys.h"
 #include "../../git.h"
+#include "VideoDriver.h"
 
 class Emulator {
 public:
@@ -25,6 +26,8 @@ private:
     int audioInited = 0;
     int joyStickInited = 0;
     int eOptions;
+
+    VideoDriver *videoDriver;
 
 };
 

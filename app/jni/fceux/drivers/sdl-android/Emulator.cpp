@@ -19,12 +19,15 @@ Emulator::Emulator() {
 	UpdateInput(g_config);
 	UpdateEMUCore(g_config);
 	setHotKeys(g_config);
+
+	videoDriver = new VideoDriver();
     SDL_Log("Emulator constructor done");
 }
 
 int Emulator::driverInitialize(FCEUGI *gi)
 {
-    if(InitVideo(gi) < 0) return 0;
+//    if(InitVideo(gi) < 0) return 0;
+    if(videoDriver->initVideo(gi) < 0) return 0;
     driverInited|=4;
     videoInited = 1;
 
@@ -186,7 +189,8 @@ void Emulator::updateEmulateData(uint8 *xbuf, int32 *sbuf, int scount) {
         // don't underflow when scaling fps
         if(g_fpsScale>1.0 || ((tmpcan < scount * 0.90) && !uflow)) {
             if(xbuf && videoInited && !(NoWaiting & 2))
-                BlitScreen(xbuf);
+                videoDriver->render(xbuf);
+//                BlitScreen(xbuf);
             sbuf+=can;
             scount-=can;
             if(scount) {
@@ -218,7 +222,8 @@ void Emulator::updateEmulateData(uint8 *xbuf, int32 *sbuf, int scount) {
                 FCEUD_UpdateInput();
             }
         if(xbuf && videoInited) {
-            BlitScreen(xbuf);
+            videoDriver->render(xbuf);
+//            BlitScreen(xbuf);
         }
     }
     FCEUD_UpdateInput();

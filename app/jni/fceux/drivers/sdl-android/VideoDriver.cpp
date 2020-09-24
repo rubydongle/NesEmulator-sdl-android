@@ -86,3 +86,22 @@ void VideoDriver::render(uint8 *XBuf) {
     SDL_RenderCopy(s_renderer, s_texture, 0, &sdlRect);//&destRect);
     SDL_RenderPresent(s_renderer);
 }
+
+/**
+ * Sets the color for a particular index in the palette.
+ */
+void FCEUD_SetPalette(uint8 index, uint8 r, uint8 g, uint8 b)
+{
+    s_psdl[index].r = r;
+    s_psdl[index].g = g;
+    s_psdl[index].b = b;
+}
+
+/**
+ * Gets the color for a particular index in the palette.
+ */
+void FCEUD_GetPalette(uint8 index, uint8 *r, uint8 *g, uint8 *b) {
+    *r = s_psdl[index].r;
+    *g = s_psdl[index].g;
+    *b = s_psdl[index].b;
+}
