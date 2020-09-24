@@ -254,15 +254,9 @@ LOCAL_SRC_FILES := \
 	${LOCAL_PATH}/drivers/sdl-android/sdl-throttle.cpp \
 	${LOCAL_PATH}/drivers/sdl-android/unix-netplay.cpp \
     ${LOCAL_PATH}/drivers/sdl-android/main.cpp \
-	${LOCAL_PATH}/drivers/sdl-android/sdl-sound.cpp   \
-	${LOCAL_PATH}/drivers/sdl-android/sdl-video.cpp \
 	${LOCAL_PATH}/drivers/sdl-android/Emulator.cpp \
 	${LOCAL_PATH}/drivers/sdl-android/VideoDriver.cpp \
 	${LOCAL_PATH}/drivers/sdl-android/AudioDriver.cpp \
-#	${LOCAL_PATH}/drivers/videolog/nesvideos-piece.cpp \
-#	${LOCAL_PATH}/drivers/videolog/rgbtorgb.cpp \
-#	${LOCAL_PATH}/drivers/sdl-android/sdl-netplay.cpp  \
-#	${LOCAL_PATH}/drivers/sdl-android/sdl-opengl.cpp \
 
 LOCAL_SHARED_LIBRARIES := SDL2 zlib
 

@@ -87,6 +87,15 @@ void VideoDriver::render(uint8 *XBuf) {
     SDL_RenderPresent(s_renderer);
 }
 
+int VideoDriver::killVideo() {
+	if(s_inited == 0)
+		return -1;
+
+	SDL_QuitSubSystem(SDL_INIT_VIDEO);
+	s_inited = 0;
+	return 0;
+}
+
 /**
  * Sets the color for a particular index in the palette.
  */
@@ -104,4 +113,31 @@ void FCEUD_GetPalette(uint8 index, uint8 *r, uint8 *g, uint8 *b) {
     *r = s_psdl[index].r;
     *g = s_psdl[index].g;
     *b = s_psdl[index].b;
+}
+
+bool enableHUDrecording = false;
+bool FCEUI_AviEnableHUDrecording() {
+    return enableHUDrecording;
+}
+void FCEUI_SetAviEnableHUDrecording(bool enable) {
+    enableHUDrecording = enable;
+}
+
+bool disableMovieMessages = false;
+bool FCEUI_AviDisableMovieMessages() {
+    return disableMovieMessages;
+}
+void FCEUI_SetAviDisableMovieMessages(bool disable) {
+    disableMovieMessages = disable;
+}
+
+// this variable contains information about the special scaling filters
+void FCEUD_VideoChanged()
+{
+//    int buf;
+//    g_config->getOption("SDL.PAL", &buf);
+//    if(buf == 1)
+//        PAL = 1;
+//    else
+//        PAL = 0; // NTSC and Dendy
 }

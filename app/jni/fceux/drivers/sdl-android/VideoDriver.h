@@ -14,7 +14,8 @@ static SDL_Color s_psdl[256];
 class VideoDriver {
 public:
     void render(uint8* XBuf);
-    int initVideo(FCEUGI *gi);
+    int initVideo(FCEUGI *gameInfo);
+    int killVideo();
 
 private:
     SDL_Window *s_window;

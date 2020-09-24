@@ -7,7 +7,6 @@
 #include "../../version.h"
 #include "input.h"
 #include "dface.h"
-#include "sdl-video.h"
 #include "unix-netplay.h"
 #include "../common/configSys.h"
 #include "../../oldmovie.h"
@@ -160,30 +159,3 @@ void FCEUD_PrintError(const char *errormsg) {
     SDL_Log("fceud error: %s\n", errormsg);
 }
 
-// dummy functions
-#define DUMMY(__f) \
-    void __f(void) {\
-        printf("%s\n", #__f);\
-        FCEU_DispMessage("Not implemented.",0);\
-    }
-DUMMY(FCEUD_HideMenuToggle)
-DUMMY(FCEUD_MovieReplayFrom)
-DUMMY(FCEUD_ToggleStatusIcon)
-DUMMY(FCEUD_AviRecordTo)
-DUMMY(FCEUD_AviStop)
-void FCEUI_AviVideoUpdate(const unsigned char* buffer) { }
-int FCEUD_ShowStatusIcon(void) {return 0;}
-bool FCEUI_AviIsRecording(void) {return false;}
-void FCEUI_UseInputPreset(int preset) { }
-bool FCEUD_PauseAfterPlayback() { return false; }
-// These are actually fine, but will be unused and overriden by the current UI code.
-void FCEUD_TurboOn	(void) { NoWaiting|= 1; }
-void FCEUD_TurboOff   (void) { NoWaiting&=~1; }
-void FCEUD_TurboToggle(void) { NoWaiting^= 1; }
-FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int innerIndex) { return 0; }
-FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename) { return 0; }
-FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int innerIndex, int* userCancel) { return 0; }
-FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int* userCancel) { return 0; }
-ArchiveScanRecord FCEUD_ScanArchive(std::string fname) { return ArchiveScanRecord(); }
-void FCEUD_DebugBreakpoint() {return;}
-void FCEUD_TraceInstruction() {return;}

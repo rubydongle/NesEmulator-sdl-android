@@ -5,6 +5,7 @@
 #include "../common/configSys.h"
 #include "../../git.h"
 #include "VideoDriver.h"
+#include "AudioDriver.h"
 
 class Emulator {
 public:
@@ -28,6 +29,7 @@ private:
     int eOptions;
 
     VideoDriver *videoDriver;
+    AudioDriver *audioDriver;
 
 };
 

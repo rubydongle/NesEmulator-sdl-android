@@ -21,6 +21,7 @@ Emulator::Emulator() {
 	setHotKeys(g_config);
 
 	videoDriver = new VideoDriver();
+	audioDriver = new AudioDriver();
     SDL_Log("Emulator constructor done");
 }
 
@@ -31,7 +32,8 @@ int Emulator::driverInitialize(FCEUGI *gi)
     driverInited|=4;
     videoInited = 1;
 
-    if(InitSound()) {
+    if(audioDriver->initAudio()) {
+//    if(InitSound()) {
         driverInited|=1;
         audioInited = 1;
 
@@ -73,12 +75,13 @@ void Emulator::driverKill()
     }
 
     if(videoInited) {
-        KillVideo();
+        videoDriver->killVideo();
         videoInited = 0;
     }
 
     if(audioInited) {
-        KillSound();
+        audioDriver->killAudio();
+//        KillSound();
         audioInited = 0;
     }
     driverInited=0;
@@ -162,7 +165,8 @@ void Emulator::doFun()//int frameskip, int periodic_saves)
 
     if(opause!=FCEUI_EmulationPaused()) {
         opause=FCEUI_EmulationPaused();
-        SilenceSound(opause);
+        audioDriver->silenceSound(opause);
+//        SilenceSound(opause);
     }
 }
 
@@ -173,19 +177,19 @@ void Emulator::updateEmulateData(uint8 *xbuf, int32 *sbuf, int scount) {
     // apply frame scaling to Count
     scount = (int)(scount / g_fpsScale);
     if(scount) {
-        int32 can=GetWriteSound();
+        int32 can=audioDriver->getWriteSound();//GetWriteSound();
         static int uflow=0;
         int32 tmpcan;
 
         // don't underflow when scaling fps
-        if(can >= GetMaxSound() && g_fpsScale==1.0) uflow=1;	/* Go into massive underflow mode. */
+        if(can >= audioDriver->getMaxSound()/*GetMaxSound()*/ && g_fpsScale==1.0) uflow=1;	/* Go into massive underflow mode. */
 
         if(can > scount) can=scount;
         else uflow=0;
 
-        WriteSound(sbuf, can);
+        audioDriver->writeSound(sbuf, can);
         //if(uflow) puts("Underflow");
-        tmpcan = GetWriteSound();
+        tmpcan = audioDriver->getWriteSound();
         // don't underflow when scaling fps
         if(g_fpsScale>1.0 || ((tmpcan < scount * 0.90) && !uflow)) {
             if(xbuf && videoInited && !(NoWaiting & 2))
@@ -195,12 +199,12 @@ void Emulator::updateEmulateData(uint8 *xbuf, int32 *sbuf, int scount) {
             scount-=can;
             if(scount) {
                 if(NoWaiting) {
-                    can=GetWriteSound();
+                    can=audioDriver->getWriteSound();
                     if(scount > can) scount=can;
-                    WriteSound(sbuf, scount);
+                    audioDriver->writeSound(sbuf, scount);
                 } else {
                     while(scount > 0) {
-                        WriteSound(sbuf, (scount < ocount) ? scount : ocount);
+                        audioDriver->writeSound(sbuf, (scount < ocount) ? scount : ocount);
                         scount -= ocount;
                     }
                 }
@@ -256,3 +260,31 @@ int Emulator::closeGame() {
     InputUserActiveFix();
     return(1);
 }
+
+// dummy functions
+#define DUMMY(__f) \
+    void __f(void) {\
+        printf("%s\n", #__f);\
+        FCEU_DispMessage("Not implemented.",0);\
+    }
+DUMMY(FCEUD_HideMenuToggle)
+DUMMY(FCEUD_MovieReplayFrom)
+DUMMY(FCEUD_ToggleStatusIcon)
+DUMMY(FCEUD_AviRecordTo)
+DUMMY(FCEUD_AviStop)
+void FCEUI_AviVideoUpdate(const unsigned char* buffer) { }
+int FCEUD_ShowStatusIcon(void) {return 0;}
+bool FCEUI_AviIsRecording(void) {return false;}
+void FCEUI_UseInputPreset(int preset) { }
+bool FCEUD_PauseAfterPlayback() { return false; }
+// These are actually fine, but will be unused and overriden by the current UI code.
+void FCEUD_TurboOn	(void) { NoWaiting|= 1; }
+void FCEUD_TurboOff   (void) { NoWaiting&=~1; }
+void FCEUD_TurboToggle(void) { NoWaiting^= 1; }
+FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int innerIndex) { return 0; }
+FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename) { return 0; }
+FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int innerIndex, int* userCancel) { return 0; }
+FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int* userCancel) { return 0; }
+ArchiveScanRecord FCEUD_ScanArchive(std::string fname) { return ArchiveScanRecord(); }
+void FCEUD_DebugBreakpoint() {return;}
+void FCEUD_TraceInstruction() {return;}

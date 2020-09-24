@@ -4,7 +4,6 @@
 #include "../common/cheat.h"
 #include "input.h"
 #include "dface.h"
-#include "sdl-video.h"
 #include "unix-netplay.h"
 
 #include <unistd.h>

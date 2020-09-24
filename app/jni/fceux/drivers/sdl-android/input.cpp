@@ -2,7 +2,6 @@
 #include "dface.h"
 #include "input.h"
 #include "config.h"
-#include "sdl-video.h"
 #include "../common/cheat.h"
 #include "../../movie.h"
 #include "../../fceu.h"
@@ -94,12 +93,12 @@ static uint32 JSreturn = 0;
 static void
 DoCheatSeq ()
 {
-	SilenceSound (1);
-	KillVideo ();
+//	SilenceSound (1);
+//	KillVideo ();
 
 	DoConsoleCheatConfig ();
-	InitVideo (GameInfo);
-	SilenceSound (0);
+//	InitVideo (GameInfo);
+//	SilenceSound (0);
 }
 
 #include "keyscan.h"
@@ -334,7 +333,7 @@ static void KeyboardCommands ()
 	// Alt-Enter to toggle full-screen
 	if (keyonly (ENTER) && is_alt)
 	{
-		ToggleFS ();
+//		ToggleFS ();
 	}
 
 
@@ -705,7 +704,7 @@ GetMouseData (uint32 (&d)[3])
 	}
 
 	// get the mouse position from the SDL video driver
-	t = PtoV (x, y);
+//	t = PtoV (x, y);
 	d[0] = t & 0xFFFF;
 	d[1] = (t >> 16) & 0xFFFF;
 	// debug print 
@@ -762,7 +761,7 @@ int ButtonConfigBegin ()
 	SDL_QuitSubSystem (SDL_INIT_VIDEO);
 
 	// shut down the video and joystick subsystems
-	bcpv = KillVideo ();
+//	bcpv = KillVideo ();
 	SDL_Surface *screen;
 
 	bcpj = KillJoysticks ();
@@ -772,7 +771,7 @@ int ButtonConfigBegin ()
 	{
 		if (!bcpv)
 		{
-			InitVideo (GameInfo);
+//			InitVideo (GameInfo);
 		}
 		else
 		{
